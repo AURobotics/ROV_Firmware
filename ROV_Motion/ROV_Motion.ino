@@ -41,8 +41,7 @@ float Fz,Tp ; // ROV forces and torque (Heave force, Pitch torque)
 float F5, F6; // Thruster forces
 
 unsigned char incoming [10];
-unsigned char term = 0b11111111;
-
+unsigned char term = 255 ;
 // // Cytron Motor driver pins 
 // int pwm_pin1, dir_pin1; 
 // int pwm_pin2, dir_pin2;
