@@ -1,32 +1,49 @@
 #include <Arduino.h>
 
-#define dirH1   16
-#define pwmH1   4
+// A
+#define dirH1   17
+#define pwmH1   13
 
-#define dirH2   0
-#define pwmH2   2
+// B
+#define dirH2   15
+#define pwmH2   23
 
-#define dirH3   15
-#define pwmH3   23
+// C
+#define dirH3   16
+#define pwmH3   24
 
-#define dirH4   17
-#define pwmH4   13
+// D
+#define dirH4   0
+#define pwmH4   2
 
+// E
 #define enV1    32
 #define pwmV1_1 33
 #define pwmV1_2 25
 
+// F
 #define enV2    26
 #define pwmV2_1 27
 #define pwmV2_2 14
 
+#define light 19 
+
+// Horizontal thrust direction pins (A , B ,C ,D) 
 int HorizontalThrusterPinsDir[4]={dirH1,dirH2,dirH3,dirH4} ;
+
+// Horizontal thrust speeds ( A , B , C , D  )
 int HorizontalThrusterPinsSpeed[4]={pwmH1 , pwmH2 ,pwmH3 ,pwmH4} ;
 
+// vertical thrust E speed
 int VerticalThrusterSp1[2] = {pwmV1_1 , pwmV2_1} ;
+
+// vertical thrust F speed
 int VerticalThrusterSp2[2] = {pwmV1_2 , pwmV2_2} ;
 
+// Output thrust values for horizontal 
 float outputHorizontalThrusters[4] = {0, 0, 0, 0};
+
+// output thrust values for vertical 
 float outputVerticalThrusters[2] = {0, 0};
 
 
@@ -40,13 +57,19 @@ float F1, F2, F3, F4; // Thruster forces (FR,FL,BR,BL)
 float Fz,Tp ; // ROV forces and torque (Heave force, Pitch torque)
 float F5, F6; // Thruster forces
 
+
+// incomming Data from PI  
 unsigned char incoming [10];
+
+// end byte 
 unsigned char term = 255 ;
-// // Cytron Motor driver pins 
-// int pwm_pin1, dir_pin1; 
-// int pwm_pin2, dir_pin2;
-// int pwm_pin3, dir_pin3;
-// int pwm_pin4, dir_pin4; 
+
+// turn light 
+void turnLight(bool state ){
+  digitalWrite(light , state ? HIGH : LOW ) ;
+}
+
+// setup horizontal thrusters 
 
 void setup_H_motors(){
 
@@ -64,41 +87,53 @@ void setup_H_motors(){
 
 }
 
+
+// setup vertical thrusters 
 void setup_V_motors(){
 
   pinMode(pwmV1_1,OUTPUT);
   pinMode(pwmV1_2,OUTPUT);
   pinMode(enV1,OUTPUT);
 
-  digitalWrite(enV1,HIGH);
+  digitalWrite(enV1,HIGH);    // enable the bts 
 
   pinMode(pwmV2_1,OUTPUT);
   pinMode(pwmV2_2,OUTPUT);
   pinMode(enV2,OUTPUT);
 
-  digitalWrite(enV2,HIGH);
+  digitalWrite(enV2,HIGH);    // enable the bts 
 
 }
 
+// control horizontal motors 
 void controlHmotors(float speed){
   for (int num = 0 ; num <=3 ; num++ ){
-     digitalWrite(HorizontalThrusterPinsDir[num], (outputHorizontalThrusters[num] >= 0) ? HIGH : LOW );
-     analogWrite(HorizontalThrusterPinsSpeed[num] , abs(outputHorizontalThrusters[num]) ) ; 
+     digitalWrite(HorizontalThrusterPinsDir[num], (outputHorizontalThrusters[num] >= 0) ? HIGH : LOW ); // control direction
+     analogWrite(HorizontalThrusterPinsSpeed[num] , abs(outputHorizontalThrusters[num]) ) ;             // control speed
   }
  
 }
-// Pseudoinverse matrix T_inverse
+
+// control vertical motors 
+void controlVmotors(float speed){
+  for (int num = 0 ; num <=1 ; num++ ){
+    (outputVerticalThrusters[num]>=0 )? analogWrite(VerticalThrusterSp1[num], abs(outputVerticalThrusters[num]) ) : analogWrite(VerticalThrusterSp2[num] , abs(outputVerticalThrusters[num]) ) ;   // set speed according to direction
+  }
+}
+
+
+// Pseudoinverse matrix T_inverse for FX , FY ,YAW
 double T_inverse_Horizontal[4][3] = {
-    {0.25, 0.25, 0.5}, 
-    {0.25, -0.25, -0.5}, 
-    {-0.25, 0.25, -0.5},
-    {-0.25, -0.25, 0.5}
+    {0.25, 0.25, 1.4706}, 
+    {0.25, -0.25, -1.4706}, 
+    {-0.25, 0.25, -1.4706},
+    {-0.25, -0.25,  1.4706}
 };
 
-// Pseudoinverse matrix T_inverse
+// Pseudoinverse matrix T_inverse for FZ , PITCH
 double T_inverse_Vertical[2][2] = {
-    {0.5,  1},
-    {0.5, -1}
+    {0.5,  2.5},
+    {0.5, -2.5}
 };
   
 // Output thruster forces  
@@ -124,6 +159,7 @@ void applyConstraints(float* thruster_forces, int size, float max_force) {
     }
 }
 
+// compute horizontal forces 
 void ComputeHorrizontalThrustForces(double* input, double T_inverse[4][3], float* outputThrusters){
   
   // Perform matrix multiplication outputThrusters = T_inverse * input
@@ -141,6 +177,7 @@ void ComputeHorrizontalThrustForces(double* input, double T_inverse[4][3], float
     
 }
 
+// compute vertical forces 
 void ComputeVerticalThrustForces(double* input, double T_inverse[2][2], float* outputThrusters){
   
   // Perform matrix multiplication outputThrusters = T_inverse * input
@@ -158,26 +195,22 @@ void ComputeVerticalThrustForces(double* input, double T_inverse[2][2], float* o
 }
 
 
-// Configure the motor driver.
-
-// CytronMD motor_FR(PWM_DIR, pwm_pin1, dir_pin1);                  // front_right thruster 
-// CytronMD motor_FL(PWM_DIR, pwm_pin2, dir_pin2);                  // front_left thruster
-// CytronMD motor_BR(PWM_DIR, pwm_pin3, dir_pin3);
-// CytronMD motor_BL(PWM_DIR, pwm_pin4, dir_pin4);
-
-// void Move_Horizontal(float* outputHorizontalThrusters){
-  
-
-//   motor_FR.setSpeed(outputHorizontalThrusters[0]);
-//   motor_FL.setSpeed(outputHorizontalThrusters[1]);
-//   motor_BR.setSpeed(outputHorizontalThrusters[2]);
-//   motor_BL.setSpeed(outputHorizontalThrusters[3]);
-
-// }
-
 
 void setup() {
   Serial.begin(115200);
+
+  setup_H_motors() ;
+  setup_V_motors() ;
+
+  pinMode(light , OUTPUT) ;
+
+for (int num = 0 ; num <=3 ; num++ ){
+     digitalWrite(HorizontalThrusterPinsDir[num], LOW );
+     digitalWrite(HorizontalThrusterPinsSpeed[num] , LOW) ; 
+  }
+  delay(1000);
+
+
 }
 
 
@@ -197,18 +230,16 @@ void loop() {
 
       L2, R2: elevation
 
-    */
-
-    Serial.print("A7AAAAA  ");
+    */  
 
     Serial.readBytesUntil(term, incoming, 9);
 
     inputH [0] = (float) incoming [0] / 254.0 * 1023.0 * ((incoming [5] & 1)? -1 : 1);  // Fx
     inputH [1] = (float) incoming [1] / 254.0 * 1023.0 * ((incoming [5] & 2)? -1 : 1);  // Fy
-    inputH [2] = (float) incoming [3] / 254.0 * 510.0 * ((incoming [5] & 8)? -1 : 1);  // Tau
+    inputH [2] = (float) incoming [3] / 254.0 * 173.4 * ((incoming [5] & 8)? -1 : 1);  // Tau
 
     inputV [0] = (float) incoming [4] / 254.0 * 510.0 * ((incoming [5] & 16)? -1 : 1); // Fz
-    inputV [1] = (float) incoming [2] / 254.0 * 255.0 * ((incoming [5] & 4)? -1 : 1);  // Tpitch
+    inputV [1] = (float) incoming [2] / 254.0 * 102.0 * ((incoming [5] & 4)? -1 : 1);  // Tpitch
 
     for (int counter = 0 ; counter <=4  ; counter++){
       Serial.print(incoming [counter]) ;
