@@ -144,6 +144,8 @@ int VerticalThrusterSp2[2] = {pwmV1_2 , pwmV2_2} ;
 
 // The computed values for the thrusters are kept in this array 
 
+const int valvePins[2] = {12, 18};  // Replace with actual pins for DC valves
+
 // Output thrust values for horizontal  
 float outputHorizontalThrusters[4] = {0, 0, 0, 0};
 
@@ -152,7 +154,7 @@ float outputVerticalThrusters[2] = {0, 0};
 
 // Communication 
 // Define the length of the incoming data from the PI (in bytes) 
-byte incoming_data_length = 9;
+const byte incoming_data_length = 9;
 // incomming Data from PI  
 unsigned char incoming [incoming_data_length] ;
 
@@ -197,6 +199,9 @@ void turnLight(bool state ){
 // yaw parameters
 float inputYaw = 0, kpYaw = 0.2, kiYaw = 0.008, kdYaw = 0.08, setpointYaw = 100, outputYaw = 0;
 float maxOutputYaw =255 , minOutputYaw = -255;
+
+float yawAngle = 0;  // Declare and initialize yawAngle
+float pitchAngle = 0;  // Declare and initialize pitchAngle
 
 // flag to see if the PID controller is active or not
 bool flag_YAW_PID = false ;
@@ -359,7 +364,7 @@ void setup_V_motors(){
 }
 
 // control horizontal motors 
-void controlHmotors(float speed){
+void controlHmotors(float* speed){
   for (int num = 0 ; num <=3 ; num++ ){
      digitalWrite(HorizontalThrusterPinsDir[num], (outputHorizontalThrusters[num] >= 0) ? HIGH : LOW ); // control direction
      analogWrite(HorizontalThrusterPinsSpeed[num] , int(abs(outputHorizontalThrusters[num])) ) ;             // control speed
@@ -368,7 +373,7 @@ void controlHmotors(float speed){
 }
 
 // control vertical motors 
-void controlVmotors(float speed){
+void controlVmotors(float* speed){
   for (int num = 0 ; num <=1 ; num++ ){
     if (outputVerticalThrusters[num] >= 0){
       analogWrite(VerticalThrusterSp1[num] , int(abs(outputVerticalThrusters[num])) ) ; // control speed
@@ -440,19 +445,21 @@ void ComputeVerticalThrustForces(double* input, double T_inverse[2][2], float* o
 }
 
 void readIncomingData(){
-  if (Serial.available()) {
+  if (Serial.available() >= incoming_data_length) {
     // Read the incoming data from the serial port
     Serial.readBytesUntil(terminator, incoming, incoming_data_length);
 
-    // first check the checksum byte which is byte number 8 
-    // if the checksum is correct then read the data
-    // if the checksum is not correct then ignore the data
+    // Validate checksum (Byte 7 should be XOR of Bytes 0-6)
+    byte xorCheck = 0;
+    for (int i = 0; i <= 6; i++) {
+      xorCheck ^= incoming[i];
+    }
 
-    /*
-    Masry add ur code here
-    */
+    if (incoming[7] != xorCheck) {
+      Serial.println("Checksum error! Ignoring packet.");
+      return;
+    }
 
-    if (dataValid) {
     // Read the input forces
     inputH [fx_index_inputH]      = (float) incoming [fx_index_incoming_data] *(fx_max_input/fx_max_output)   *         ((incoming [sign_byte_index_incoming_data] & (1 << fx_index_incoming_data) ) ? -1 : 1);  // Fx 
     inputH [fy_index_inputH]      = (float) incoming [fy_index_incoming_data] *(fy_max_input/fy_max_output)   *         ((incoming [sign_byte_index_incoming_data] & (1 << fy_index_incoming_data) ) ? -1 : 1);  // Fy
@@ -468,15 +475,7 @@ void readIncomingData(){
     dcv1State = incoming [dcv1_index_incoming_data] & (1 << dcv1_index_input);
     // Read the DC valve 2 state
     dcv2State = incoming [dcv2_index_incoming_data] & (1 << dcv2_index_input);
-
-    }
-
-    else {
-      // Print an error message
-      Serial.println("Error: Invalid data received");
-    }
-
-}
+ }
 }
 
 void operatePID(){
@@ -529,7 +528,9 @@ void dcv1Control(bool state){
   // if the state is true, open the valve
   // if the state is false, close the valve
   // DCV is just a DC motor
-  // Masry add ur code here
+  digitalWrite(valvePins[0], state ? HIGH : LOW);
+  Serial.print("DC Valve 1: ");
+  Serial.println(state);
 }
 
 void dcv2Control(bool state){
@@ -537,7 +538,9 @@ void dcv2Control(bool state){
   // if the state is true, open the valve
   // if the state is false, close the valve
   // DCV is just a DC motor
-  // Masry add ur code here
+  digitalWrite(valvePins[1], state ? HIGH : LOW);
+  Serial.print("DC Valve 2: ");
+  Serial.println(state);
 }
 
 void debugThrusters(){
@@ -546,14 +549,14 @@ void debugThrusters(){
     Serial.print(" F");
     Serial.print(i + 1);
     Serial.print(": ");
-    Serial.print(int(outputHorizontalThrusters[i], 2)); // Print with 2 decimal places
+    Serial.print(outputHorizontalThrusters[i], 2);  // Print with 2 decimal places
   }
 
   for (int i = 0; i < 2; i++) {
     Serial.print(" F");
     Serial.print(i + 5);
     Serial.print(": ");
-    Serial.print(int(outputVerticalThrusters[i], 2)); // Print with 2 decimal places
+    Serial.print(outputVerticalThrusters[i], 2);  // Print with 2 decimal places
   }
 
   Serial.println();
@@ -571,6 +574,10 @@ void setup() {
   setup_V_motors() ;
 
   pinMode(light , OUTPUT) ;
+
+  // Initialize valve pins
+  pinMode(valvePins[0], OUTPUT);
+  pinMode(valvePins[1], OUTPUT);
 
   // turn off all motors
 for (int num = 0 ; num <=3 ; num++ ){
@@ -620,7 +627,7 @@ Masry add ur code here
   // PID controllers for YAW and PITCH
   operatePID();
 
-  // Read presuure sensor data
+  // Read presure sensor data
 
   
 /*
