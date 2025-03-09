@@ -90,6 +90,8 @@
 #define dcv1_index_input 1
 #define dcv2_index_input 2
 
+#define incoming_data_length  9
+
 // ############################################ End of Defines ########################################################## //
 
 // ########################################################### Global variables ########################################################### //
@@ -152,9 +154,9 @@ float outputVerticalThrusters[2] = {0, 0};
 
 // Communication 
 // Define the length of the incoming data from the PI (in bytes) 
-byte incoming_data_length = 9;
+
 // incomming Data from PI  
-unsigned char incoming [incoming_data_length] ;
+unsigned char incoming[incoming_data_length] ;
 
 // terminator for the incoming data
 unsigned char terminator = 255 ;
@@ -169,6 +171,10 @@ bool dcv1State = 0;
 bool dcv2State = 0;
 
 bool dataValid = 0 ;
+
+float yawAngle ;
+
+float pitchAngle ;
 
 // Pseudoinverse matrix T_inverse for FX , FY ,YAW
 double T_inverse_Horizontal[4][3] = {
@@ -361,7 +367,7 @@ void setup_V_motors(){
 }
 
 // control horizontal motors 
-void controlHmotors(float speed){
+void controlHmotors(){
   for (int num = 0 ; num <=3 ; num++ ){
      digitalWrite(HorizontalThrusterPinsDir[num], (outputHorizontalThrusters[num] >= 0) ? HIGH : LOW ); // control direction
      analogWrite(HorizontalThrusterPinsSpeed[num] , int(abs(outputHorizontalThrusters[num])) ) ;             // control speed
@@ -370,7 +376,7 @@ void controlHmotors(float speed){
 }
 
 // control vertical motors 
-void controlVmotors(float speed){
+void controlVmotors(){
   for (int num = 0 ; num <=1 ; num++ ){
     if (outputVerticalThrusters[num] >= 0){
       analogWrite(VerticalThrusterSp1[num] , int(abs(outputVerticalThrusters[num])) ) ; // control speed
@@ -548,14 +554,14 @@ void debugThrusters(){
     Serial.print(" F");
     Serial.print(i + 1);
     Serial.print(": ");
-    Serial.print(int(outputHorizontalThrusters[i], 2)); // Print with 2 decimal places
+    Serial.print(int(outputHorizontalThrusters[i])); // Print with 2 decimal places
   }
 
   for (int i = 0; i < 2; i++) {
     Serial.print(" F");
     Serial.print(i + 5);
     Serial.print(": ");
-    Serial.print(int(outputVerticalThrusters[i], 2)); // Print with 2 decimal places
+    Serial.print(int(outputVerticalThrusters[i])); // Print with 2 decimal places
   }
 
   Serial.println();
@@ -598,10 +604,10 @@ void loop() {
   ComputeVerticalThrustForces(inputV, T_inverse_Vertical, outputVerticalThrusters);
 
   // Control the horizontal thrusters
-  controlHmotors(outputHorizontalThrusters);
+  controlHmotors();
 
   // Control the vertical thrusters
-  controlVmotors(outputVerticalThrusters);
+  controlVmotors();
 
   // Turn the light on or off
   turnLight(ledState);
