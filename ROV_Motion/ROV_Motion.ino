@@ -1,5 +1,6 @@
 #include <Arduino.h>
-
+#include <Wire.h>
+#include <Adafruit_BMP280.h>
 // Mate 2025 ROV Competition
 // Team: AU-ROBOTICS
 
@@ -169,6 +170,9 @@ bool dcv1State = 0;
 
 // DC valve 2 state
 bool dcv2State = 0;
+
+//bmp280 object
+Adafruit_BMP280 bmp;
 
 // Pseudoinverse matrix T_inverse for FX , FY ,YAW
 double T_inverse_Horizontal[4][3] = {
@@ -586,6 +590,11 @@ for (int num = 0 ; num <=3 ; num++ ){
   }
   delay(1000);
 
+  // Initialize BMP280 sensor
+  if (!bmp.begin(0x76)) {
+    Serial.println("Could not find a valid BMP280 sensor, check wiring!");
+  }
+
 
 }
 
@@ -628,18 +637,18 @@ Masry add ur code here
   operatePID();
 
   // Read presure sensor data
+    Serial.print("Pressure = ");
+    Serial.print(bmp.readPressure() / 100.0); // Convert Pa to hPa
+    Serial.println(" hPa");
 
-  
-/*
-Masry add ur code here
-*/
+    Serial.print("Approx Altitude = ");
+    Serial.print(bmp.readAltitude(1013.25)); // Standard pressure at sea level
+    Serial.println(" m");
 
   // Read temperature sensor data
-
-  
-/*
-Masry add ur code here
-*/
+    Serial.print("Temperature = ");
+    Serial.print(bmp.readTemperature());
+    Serial.println(" *C");
 
 // prepare data frame to be sent contating the thruster values of the ROV all the angles and accelerations the depth and the temperature
 
