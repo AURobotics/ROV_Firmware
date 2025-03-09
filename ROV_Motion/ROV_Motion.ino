@@ -168,6 +168,8 @@ bool dcv1State = 0;
 // DC valve 2 state
 bool dcv2State = 0;
 
+bool dataValid = 0 ;
+
 // Pseudoinverse matrix T_inverse for FX , FY ,YAW
 double T_inverse_Horizontal[4][3] = {
   {0.25, 0.25, 1.4706}, 
