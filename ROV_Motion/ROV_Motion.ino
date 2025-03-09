@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <Adafruit_BMP280.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BNO055.h>
 // Mate 2025 ROV Competition
 // Team: AU-ROBOTICS
 
@@ -173,6 +175,24 @@ bool dcv2State = 0;
 
 //bmp280 object
 Adafruit_BMP280 bmp;
+
+// Create BNO055 object
+Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x29, &Wire);
+
+// IMU data
+float roll = 0;
+float pitch = 0;
+float yaw = 0;
+
+void imu_read() {
+  // Get Euler angles (in degrees)
+  sensors_event_t event;
+  bno.getEvent(&event);
+
+  roll = event.orientation.x;
+  pitch = event.orientation.y;
+  yaw = event.orientation.z;
+}
 
 // Pseudoinverse matrix T_inverse for FX , FY ,YAW
 double T_inverse_Horizontal[4][3] = {
@@ -595,10 +615,14 @@ for (int num = 0 ; num <=3 ; num++ ){
     Serial.println("Could not find a valid BMP280 sensor, check wiring!");
   }
 
+  // Initialize BNO055 sensor
+  if (!bno.begin()) {
+    Serial.println("BNO055 not detected!");
+    while (1);
+      
+  }
 
 }
-
-
 
 void loop() {
 
@@ -626,12 +650,16 @@ void loop() {
   // Control the DC valve 2
   dcv2Control(dcv2State);
 
-  
-// Read angle data from the IMU
-
-/*
-Masry add ur code here
-*/
+  // Read data from the IMU
+  imu_read();
+  // Print the results
+  Serial.print("Roll: ");
+  Serial.print(roll);
+  Serial.print(" °\tPitch: ");
+  Serial.print(pitch);
+  Serial.print(" °\tYaw: ");
+  Serial.print(yaw);
+  Serial.println(" °");
 
   // PID controllers for YAW and PITCH
   operatePID();
@@ -655,7 +683,12 @@ Masry add ur code here
 /* Masry add ur code here */
 
   // Print the results
-  
-
+  Serial.print("Roll: ");
+  Serial.print(roll);
+  Serial.print(" °\tPitch: ");
+  Serial.print(pitch);
+  Serial.print(" °\tYaw: ");
+  Serial.print(yaw);
+  Serial.println(" °");
   
 }
