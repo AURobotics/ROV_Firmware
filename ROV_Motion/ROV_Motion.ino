@@ -1,4 +1,8 @@
 #include <Arduino.h>
+#include <Wire.h>
+#include <Adafruit_BMP280.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BNO055.h>
 
 // Mate 2025 ROV Competition
 // Team: AU-ROBOTICS
@@ -152,6 +156,10 @@ float outputHorizontalThrusters[4] = {0, 0, 0, 0};
 // output thrust values for vertical 
 float outputVerticalThrusters[2] = {0, 0};
 
+// The computed values for the thrusters are kept in this array 
+
+const int valvePins[2] = {12, 18};  // Replace with actual pins for DC valves
+
 // Communication 
 // Define the length of the incoming data from the PI (in bytes) 
 
@@ -170,11 +178,20 @@ bool dcv1State = 0;
 // DC valve 2 state
 bool dcv2State = 0;
 
+// IMU data
+float rollAngle = 0;
+float pitchAngle = 0;
+float yawAngle = 0;
+
 bool dataValid = 0 ;
 
-float yawAngle ;
+//bmp280 object 
+Adafruit_BMP280 bmp;
 
-float pitchAngle ;
+// Create BNO055 object
+Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x29, &Wire);
+
+
 
 // Pseudoinverse matrix T_inverse for FX , FY ,YAW
 double T_inverse_Horizontal[4][3] = {
@@ -456,11 +473,17 @@ void readIncomingData(){
     // if the checksum is correct then read the data
     // if the checksum is not correct then ignore the data
 
-    /*
-    Masry add ur code here
-    */
+    // Validate checksum (Byte 7 should be XOR of Bytes 0-6)
+    byte xorCheck = 0;
+    for (int i = 0; i <= 6; i++) {
+      xorCheck ^= incoming[i];
+    }
 
-    if (dataValid) {
+    if (incoming[7] != xorCheck) {
+      Serial.println("Checksum error! Ignoring packet.");
+      return;
+    }
+
     // Read the input forces
     inputH [fx_index_inputH]      = (float) incoming [fx_index_incoming_data] *(fx_max_input/fx_max_output)   *         ((incoming [sign_byte_index_incoming_data] & (1 << fx_index_incoming_data) ) ? -1 : 1);  // Fx 
     inputH [fy_index_inputH]      = (float) incoming [fy_index_incoming_data] *(fy_max_input/fy_max_output)   *         ((incoming [sign_byte_index_incoming_data] & (1 << fy_index_incoming_data) ) ? -1 : 1);  // Fy
@@ -477,12 +500,6 @@ void readIncomingData(){
     // Read the DC valve 2 state
     dcv2State = incoming [dcv2_index_incoming_data] & (1 << dcv2_index_input);
 
-    }
-
-    else {
-      // Print an error message
-      Serial.println("Error: Invalid data received");
-    }
 
 }
 }
@@ -537,7 +554,9 @@ void dcv1Control(bool state){
   // if the state is true, open the valve
   // if the state is false, close the valve
   // DCV is just a DC motor
-  // Masry add ur code here
+  digitalWrite(valvePins[0], state ? HIGH : LOW);
+  Serial.print("DC Valve 1: ");
+  Serial.println(state);
 }
 
 void dcv2Control(bool state){
@@ -545,7 +564,21 @@ void dcv2Control(bool state){
   // if the state is true, open the valve
   // if the state is false, close the valve
   // DCV is just a DC motor
-  // Masry add ur code here
+  digitalWrite(valvePins[1], state ? HIGH : LOW);
+  Serial.print("DC Valve 2: ");
+  Serial.println(state);
+}
+
+// IMU functions 
+
+void imu_read() {
+  // Get Euler angles (in degrees)
+  sensors_event_t event;
+  bno.getEvent(&event);
+
+  rollAngle = event.orientation.x;
+  pitchAngle = event.orientation.y;
+  yawAngle = event.orientation.z;
 }
 
 void debugThrusters(){
@@ -579,6 +612,22 @@ void setup() {
   setup_V_motors() ;
 
   pinMode(light , OUTPUT) ;
+
+    // Initialize valve pins
+  pinMode(valvePins[0], OUTPUT);
+  pinMode(valvePins[1], OUTPUT);
+
+    // Initialize BMP280 sensor
+    if (!bmp.begin(0x76)) {
+      Serial.println("Could not find a valid BMP280 sensor, check wiring!");
+    }
+  
+    // Initialize BNO055 sensor
+    if (!bno.begin()) {
+      Serial.println("BNO055 not detected!");
+      while (1);
+        
+    }
 
   // turn off all motors
 for (int num = 0 ; num <=3 ; num++ ){
@@ -619,12 +668,8 @@ void loop() {
   dcv2Control(dcv2State);
 
   
-// Read angle data from the IMU
-
-/*
-Masry add ur code here
-*/
-
+  // Read data from the IMU
+  imu_read();
   // PID controllers for YAW and PITCH
   operatePID();
 
