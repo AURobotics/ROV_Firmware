@@ -31,7 +31,7 @@
 
 // C
 #define dirH3   16
-#define pwmH3   24
+#define pwmH3   4
 
 // D
 #define dirH4   0
