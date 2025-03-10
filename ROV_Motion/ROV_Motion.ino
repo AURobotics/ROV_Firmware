@@ -183,6 +183,9 @@ float rollAngle = 0;
 float pitchAngle = 0;
 float yawAngle = 0;
 
+bool yaw_input_flag = 0 ;
+bool pitch_input_flag = 0 ;
+
 bool dataValid = 0 ;
 
 //bmp280 object 
@@ -500,6 +503,9 @@ void readIncomingData(){
     // Read the DC valve 2 state
     dcv2State = incoming [dcv2_index_incoming_data] & (1 << dcv2_index_input);
 
+    yaw_input_flag = incoming [tau_index_incoming_data] ? 1 : 0 ;
+    pitch_input_flag = incoming [tpitch_index_incoming_data] ? 1 : 0 ;
+
 
 }
 }
@@ -508,16 +514,18 @@ void operatePID(){
 // Check if the input forces are zero for YAW
 // If the input forces are zero, start the PID controller for YAW
 // If the input forces are not zero, stop the PID controller for YAW
-if (inputH[tau_index_incoming_data] == 0) {
+if (yaw_input_flag) {
   // if its the first time to start the PID controller, set the setpoint to the current yaw angle
   // if its not the first time, keep the setpoint as it is
-  flag_YAW_PID ? setpointYaw = setpointYaw : setpointYaw = yawAngle ;
+  flag_YAW_PID ? (setpointYaw = setpointYaw) : (setpointYaw = yawAngle) ;
   // set the flag to true
   flag_YAW_PID = true ;
   // set the input yaw angle
   inputYaw = yawAngle;
   // Start the PID controller for YAW
   PID_YAW(true);
+  // set the output yaw torque
+  inputH [tau_index_inputH] = outputYaw ;
 }
 else {
   // Stop the PID controller for YAW
@@ -529,16 +537,18 @@ else {
 // Check if the input forces are zero for PITCH
 // If the input forces are zero, start the PID controller for PITCH
 // If the input forces are not zero, stop the PID controller for PITCH
-if (inputV[tpitch_index_incoming_data] == 0) {
+if (pitch_input_flag) {
   // if its the first time to start the PID controller, set the setpoint to the current pitch angle
   // if its not the first time, keep the setpoint as it is
-  flag_PITCH_PID ? setpointPitch = setpointPitch : setpointPitch = pitchAngle ;
+  flag_PITCH_PID ? (setpointPitch = setpointPitch) : (setpointPitch = pitchAngle) ;
   // set the flag to true
   flag_PITCH_PID = true ;
   // set the input pitch angle
   inputPitch = pitchAngle;
   // Start the PID controller for PITCH
   PID_PITCH(true);
+  // set the output pitch torque
+  inputV [tpitch_index_inputV] = outputPitch ;
 }
 else {
   // Stop the PID controller for PITCH
@@ -646,6 +656,12 @@ void loop() {
   // Read the incoming data from the serial port
   readIncomingData();
 
+  // Read data from the IMU
+  imu_read();
+
+  // PID controllers for YAW and PITCH
+  operatePID();
+
   // Compute the thruster forces for the horizontal thrusters
   ComputeHorrizontalThrustForces(inputH, T_inverse_Horizontal, outputHorizontalThrusters);
 
@@ -668,10 +684,9 @@ void loop() {
   dcv2Control(dcv2State);
 
   
-  // Read data from the IMU
-  imu_read();
-  // PID controllers for YAW and PITCH
-  operatePID();
+  
+  
+  
 
   // Read presuure sensor data
 
@@ -685,7 +700,8 @@ Masry add ur code here
   
 /*
 Masry add ur code here
-*/
+*/            
+
 
 // prepare data frame to be sent contating the thruster values of the ROV all the angles and accelerations the depth and the temperature
 
