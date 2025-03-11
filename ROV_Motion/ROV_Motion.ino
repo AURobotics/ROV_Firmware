@@ -22,31 +22,51 @@
 // Horizontal Thrusters: A, B, C, D
 // Vertical Thrusters: E, F
 
-// A
-#define dirH1   17
-#define pwmH1   13
+#define motor1Dir 17
+#define motor1Pwm 13
 
-// B
-#define dirH2   15
-#define pwmH2   23
+#define motor2Dir 15
+#define motor2Pwm 23
 
-// C
-#define dirH3   16
-#define pwmH3   4
+#define motor3Dir 16
+#define motor3Pwm 4
 
-// D
-#define dirH4   0
-#define pwmH4   2
+#define motor4Dir 0
+#define motor4Pwm 2
+
+#define motor5PwmA 33
+#define motor5PwmB 25
+
+#define motor6PwmA 27 
+#define motor6PwmB 14
+
+
+// A //-> written D // motor 1
+#define dirH1  motor1Dir
+#define pwmH1  motor1Pwm
+
+
+// B // -> written D
+#define dirH2  motor2Dir
+#define pwmH2  motor2Pwm
+
+// C // written A
+#define dirH3   motor3Dir
+#define pwmH3   motor3Pwm
+
+// D // written B
+#define dirH4   motor4Dir
+#define pwmH4   motor4Pwm
 
 // E
 #define enV1    32
-#define pwmV1_1 33
-#define pwmV1_2 25
+#define pwmV1_1 motor5PwmA
+#define pwmV1_2 motor5PwmB
 
 // F
 #define enV2    26
-#define pwmV2_1 27
-#define pwmV2_2 14
+#define pwmV2_1 motor6PwmA
+#define pwmV2_2 motor6PwmB
 
 // Light
 #define light   19 
@@ -170,7 +190,7 @@ unsigned char incoming[incoming_data_length] ;
 unsigned char terminator = 255 ;
 
 // LED state
-bool ledState = 0;
+bool ledState = 1;
 
 // DC valve 1 state
 bool dcv1State = 0;
@@ -198,12 +218,11 @@ Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x29, &Wire);
 
 // Pseudoinverse matrix T_inverse for FX , FY ,YAW
 double T_inverse_Horizontal[4][3] = {
-  {0.25, 0.25, 1.4706}, 
-  {0.25, -0.25, -1.4706}, 
-  {-0.25, 0.25, -1.4706},
-  {-0.25, -0.25,  1.4706}
+  {0.25, -0.25, 1.4706}, 
+  {0.25, 0.25, -1.4706}, 
+  {-0.25, 0.25, 1.4706},
+  {-0.25, -0.25,  -1.4706}
 };
-
 // Pseudoinverse matrix T_inverse for FZ , PITCH
 double T_inverse_Vertical[2][2] = {
   {0.5,  2.5},
@@ -215,7 +234,7 @@ double T_inverse_Vertical[2][2] = {
  
 // Lights control
 void turnLight(bool state ){
-  digitalWrite(light , state ? HIGH : LOW ) ;
+  analogWrite(light , state ? 127 : 0 ) ;
 }
 
 
@@ -586,9 +605,9 @@ void imu_read() {
   sensors_event_t event;
   bno.getEvent(&event);
 
-  rollAngle = event.orientation.x;
-  pitchAngle = event.orientation.y;
-  yawAngle = event.orientation.z;
+  rollAngle = event.orientation.roll;
+  pitchAngle = event.orientation.pitch;
+  yawAngle = event.orientation.heading;
 }
 
 void debugThrusters(){
@@ -609,6 +628,14 @@ void debugThrusters(){
 
   Serial.println();
 }
+void debugSensors(){
+  Serial.print(yawAngle);
+  Serial.print("  ");
+  Serial.print(pitchAngle);
+  Serial.print("  ");
+  Serial.print(rollAngle);
+  Serial.println();
+}
 
 /*
 Masry add ur code here ( IMU Functions )
@@ -627,10 +654,10 @@ void setup() {
   pinMode(valvePins[0], OUTPUT);
   pinMode(valvePins[1], OUTPUT);
 
-    // Initialize BMP280 sensor
-    if (!bmp.begin(0x76)) {
-      Serial.println("Could not find a valid BMP280 sensor, check wiring!");
-    }
+    // // Initialize BMP280 sensor
+    // if (!bmp.begin(0x76)) {
+    //   Serial.println("Could not find a valid BMP280 sensor, check wiring!");
+    // }
   
     // Initialize BNO055 sensor
     if (!bno.begin()) {
@@ -639,12 +666,13 @@ void setup() {
         
     }
 
+
   // turn off all motors
 for (int num = 0 ; num <=3 ; num++ ){
      digitalWrite(HorizontalThrusterPinsDir[num], LOW );
      digitalWrite(HorizontalThrusterPinsSpeed[num] , LOW) ; 
   }
-  delay(1000);
+  delay(2000);
 
 
 }
