@@ -31,7 +31,7 @@
 #define motor3Dir 16
 #define motor3Pwm 4
 
-#define motor4Dir 0
+#define motor4Dir 5
 #define motor4Pwm 2
 
 #define motor5PwmA 33
