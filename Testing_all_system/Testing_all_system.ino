@@ -42,31 +42,31 @@
 
 
 // A //-> written D // motor 1
-#define dirH1  motor4Dir
-#define pwmH1  motor4Pwm
+#define dirH1  motor1Dir
+#define pwmH1  motor1Pwm
 
 
 // B // -> written D
-#define dirH2  motor3Dir
-#define pwmH2  motor3Pwm
+#define dirH2  motor2Dir
+#define pwmH2  motor2Pwm
 
 // C // written A
-#define dirH3   motor2Dir
-#define pwmH3   motor2Pwm
+#define dirH3   motor3Dir
+#define pwmH3   motor3Pwm
 
 // D // written B
-#define dirH4   motor1Dir
-#define pwmH4   motor1Pwm
+#define dirH4   motor4Dir
+#define pwmH4   motor4Pwm
 
 // E
 #define enV1    32
-#define pwmV1_1 motor6PwmA
-#define pwmV1_2 motor6PwmB
+#define pwmV1_1 motor5PwmA
+#define pwmV1_2 motor5PwmB
 
 // F
 #define enV2    26
-#define pwmV2_1 motor5PwmA
-#define pwmV2_2 motor5PwmB
+#define pwmV2_1 motor6PwmA
+#define pwmV2_2 motor6PwmB
 
 // Light
 #define light   19 
@@ -190,7 +190,7 @@ unsigned char incoming[incoming_data_length] ;
 unsigned char terminator = 255 ;
 
 // LED state
-bool ledState = 0;
+bool ledState = 1;
 
 // DC valve 1 state
 bool dcv1State = 0;
@@ -207,8 +207,6 @@ bool yaw_input_flag = 0 ;
 bool pitch_input_flag = 0 ;
 
 bool dataValid = 0 ;
-
-unsigned long t = 0 ;
 
 //bmp280 object 
 Adafruit_BMP280 bmp;
@@ -374,20 +372,19 @@ else {
 // ########################################################### Functions ########################################################### //
 // setup horizontal thrusters 
 
-bool stateH = true;
 void setup_H_motors(){
 
-  pinMode(dirH1,stateH ? OUTPUT : INPUT_PULLUP);
-  pinMode(pwmH1,stateH ? OUTPUT : INPUT_PULLUP);
+  pinMode(dirH1,OUTPUT);
+  pinMode(pwmH1,OUTPUT);
   
-  pinMode(dirH2,stateH ? OUTPUT : INPUT_PULLUP);
-  pinMode(pwmH2,stateH ? OUTPUT : INPUT_PULLUP);
+  pinMode(dirH2,OUTPUT);
+  pinMode(pwmH2,OUTPUT);
   
-  pinMode(dirH3,stateH ? OUTPUT : INPUT_PULLUP);
-  pinMode(pwmH3,stateH ? OUTPUT : INPUT_PULLUP);
+  pinMode(dirH3,OUTPUT);
+  pinMode(pwmH3,OUTPUT);
   
-  pinMode(dirH4,stateH ? OUTPUT : INPUT_PULLUP);
-  pinMode(pwmH4,stateH ? OUTPUT : INPUT_PULLUP);
+  pinMode(dirH4,OUTPUT);
+  pinMode(pwmH4,OUTPUT);
 
 }
 
@@ -489,15 +486,8 @@ void ComputeVerticalThrustForces(double* input, double T_inverse[2][2], float* o
   applyConstraints(outputThrusters, 2,max_force);    
 }
 
-unsigned long lastMillis = 0;
 void readIncomingData(){
   if (Serial.available()) {
-    // lastMillis = millis();
-    // if(!stateH)
-    // {
-    //   stateH = true;
-    //   setup_H_motors();
-    // }
     // Read the incoming data from the serial port
     Serial.readBytesUntil(terminator, incoming, incoming_data_length);
 
@@ -670,11 +660,11 @@ void setup() {
     // }
   
     // Initialize BNO055 sensor
-    // if (!bno.begin()) {
-    //   Serial.println("BNO055 not detected!");
-    //   while (1);
+    if (!bno.begin()) {
+      Serial.println("BNO055 not detected!");
+      while (1);
         
-    // }
+    }
 
 
   // turn off all motors
@@ -691,68 +681,39 @@ for (int num = 0 ; num <=3 ; num++ ){
 
 void loop() {
 
-  // if(millis() > lastMillis + 1000)
-  // {
-  //   if(stateH)
-  //   {
-  //     stateH = false;
-  //     setup_H_motors();
-  //   }
-  // }
+  // // Read the incoming data from the serial port
+  // readIncomingData();
 
-  // outputHorizontalThrusters[0] = 0 ;
-  // outputHorizontalThrusters[1] = 0 ;
-  // outputHorizontalThrusters[2] = 0 ;
-  // outputHorizontalThrusters[3] = 0 ;
-
-  // //Control the horizontal thrusters
-  // controlHmotors();
-
-  // // Control the vertical thrusters
-  // controlVmotors();
-
-  // delay(1000) ; 
-
-  // outputHorizontalThrusters[0] = 0 ;
-  // outputHorizontalThrusters[1] = 0 ;
-  // outputHorizontalThrusters[2] = 0 ;
-  // outputHorizontalThrusters[3] = 0 ;
-
-  // outputVerticalThrusters[0] = 255 ; 
-  // outputVerticalThrusters[1] = -100 ;
-
-  // Read the incoming data from the serial port
-  readIncomingData();
-
-  // Read data from the IMU
+  // // Read data from the IMU
   // imu_read();
-  // debugSensors();
-  // delay(50);
 
   // // PID controllers for YAW and PITCH
   // operatePID();
 
-  // Compute the thruster forces for the horizontal thrusters
-  ComputeHorrizontalThrustForces(inputH, T_inverse_Horizontal, outputHorizontalThrusters);
+  // // Compute the thruster forces for the horizontal thrusters
+  // ComputeHorrizontalThrustForces(inputH, T_inverse_Horizontal, outputHorizontalThrusters);
 
-  // Compute the thruster forces for the vertical thrusters
-  ComputeVerticalThrustForces(inputV, T_inverse_Vertical, outputVerticalThrusters);
+  // // Compute the thruster forces for the vertical thrusters
+  // ComputeVerticalThrustForces(inputV, T_inverse_Vertical, outputVerticalThrusters);
 
-  //Control the horizontal thrusters
+  outputHorizontalThrusters[0] = 255;
+  outputHorizontalThrusters[1] = 255;
+  outputHorizontalThrusters[2] = 255;
+  outputHorizontalThrusters[3] = 255;
+
+  outputVerticalThrusters[0] = 255;
+  outputVerticalThrusters[1] = 255;
+
+  // Control the horizontal thrusters
   controlHmotors();
 
   // Control the vertical thrusters
   controlVmotors();
 
-   
-  debugThrusters();
-  
-  
+  // // Turn the light on or off
+  // turnLight(ledState);
 
-  // Turn the light on or off
-  turnLight(ledState);
-
-  // Control the DC valve 1
+  // // Control the DC valve 1
   // dcv1Control(dcv1State);
 
   // // Control the DC valve 2
