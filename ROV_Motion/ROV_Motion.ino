@@ -208,11 +208,8 @@ bool pitch_input_flag = 0 ;
 
 bool dataValid = 0 ;
 
-//bmp280 object 
-Adafruit_BMP280 bmp;
-
 // Create BNO055 object
-Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x29, &Wire);
+Adafruit_BNO055 Bno(1,BNO055_ADDRESS_B) ;
 
 
 
@@ -242,7 +239,7 @@ void turnLight(bool state ){
 
 // ############################################################## YAW PID ############################################################## //
 // yaw parameters
-float inputYaw = 0, kpYaw = 0.2, kiYaw = 0.008, kdYaw = 0.08, setpointYaw = 100, outputYaw = 0;
+float inputYaw = 0, kpYaw = 0.7, kiYaw = 0.1, kdYaw = 0.4, setpointYaw = 0, outputYaw = 0;
 float maxOutputYaw =255 , minOutputYaw = -255;
 
 // flag to see if the PID controller is active or not
@@ -264,7 +261,7 @@ lastTime = now;
  *                        If false, the PID controller is reset and the output is set to zero.
  */
 void PID_YAW(bool start_YAW_PID) {
-
+if (start_YAW_PID) {
 // declare variables
 static double error;
 static double derror;
@@ -273,7 +270,7 @@ static float prvError;
 double dt ;
 static unsigned long prvMillis = 0;
 unsigned long currentMillis = millis();
-    if (currentMillis - prvMillis >= 50) {
+if (currentMillis - prvMillis >= 10) {
       // Calculate the delta time
       dt = (currentMillis - prvMillis) / 1000.0;
       // Update the previous time
@@ -301,6 +298,7 @@ unsigned long currentMillis = millis();
     prvError = 0;
     outputYaw = 0;
   }
+}
 }
 
 // ############################################################## PITCH PID ############################################################## //
@@ -522,8 +520,8 @@ void readIncomingData(){
     // Read the DC valve 2 state
     dcv2State = incoming [dcv2_index_incoming_data] & (1 << dcv2_index_input);
 
-    yaw_input_flag = incoming [tau_index_incoming_data] ? 1 : 0 ;
-    pitch_input_flag = incoming [tpitch_index_incoming_data] ? 1 : 0 ;
+    yaw_input_flag = incoming [tau_index_incoming_data] ? 0 : 1 ;
+    pitch_input_flag = incoming [tpitch_index_incoming_data] ? 0 : 1 ;
 
 
 }
@@ -602,12 +600,10 @@ void dcv2Control(bool state){
 
 void imu_read() {
   // Get Euler angles (in degrees)
-  sensors_event_t event;
-  bno.getEvent(&event);
-
-  rollAngle = event.orientation.roll;
-  pitchAngle = event.orientation.pitch;
-  yawAngle = event.orientation.heading;
+  imu::Vector<3> myData = Bno.getVector(Adafruit_BNO055::VECTOR_EULER); 
+  yawAngle = myData.x();
+  rollAngle = myData.y();
+  pitchAngle = myData.z();
 }
 
 void debugThrusters(){
@@ -637,6 +633,12 @@ void debugSensors(){
   Serial.println();
 }
 
+void setupBno(){
+  // Initialize BNO055 sensor
+  if (!Bno.begin()) {
+    Serial.println("BNO055 not detected!");   
+  }
+}
 /*
 Masry add ur code here ( IMU Functions )
 */
@@ -655,17 +657,8 @@ void setup() {
   pinMode(valvePins[0], OUTPUT);
   pinMode(valvePins[1], OUTPUT);
 
-    // // Initialize BMP280 sensor
-    // if (!bmp.begin(0x76)) {
-    //   Serial.println("Could not find a valid BMP280 sensor, check wiring!");
-    // }
-  
-    // Initialize BNO055 sensor
-    if (!bno.begin()) {
-      Serial.println("BNO055 not detected!");
-      while (1);
-        
-    }
+  // Initialize BNO055 sensor
+  setupBno();
 
 
   // turn off all motors
