@@ -796,45 +796,8 @@ void checkSerialDataAndControlMotors(){
   checkSerial();
   debugThrusters();
 }
-/*
-Masry add ur code here ( IMU Functions )
-*/
-// ########################################################### End of Functions ########################################################### //
 
-void setup() {
-  Serial.begin(115200);
-
-  // setup motors
-  setup_H_motors();
-  setup_V_motors();
-
-  pinMode(light, OUTPUT);
-
-  // Initialize valve pins
-  setupDCV();
-
-  // Initialize BNO055 sensor
-  setupBno();
-
-  // turn off all motors
-  stopMotors();
-  delay(2000);
-
-  #ifdef TEST_MOTORS 
-  testMotors();
-  delay(TIME_FOR_TESTING_MOTORS);
-  stopMotors();
-  #endif
-
-  #ifdef CHECK_ALL_SYSTEM
-  checkAllSystem();
-  #endif
-}
-
-
-
-void loop() {
-
+void main(){
   // Read the incoming data from the serial port
   readIncomingData();
 
@@ -876,4 +839,46 @@ void loop() {
   /* ziyad add ur code here */
 
   // Print the results
+}
+/*
+Masry add ur code here ( IMU Functions )
+*/
+// ########################################################### End of Functions ########################################################### //
+
+void setup() {
+  Serial.begin(115200);
+
+  // setup motors
+  setup_H_motors();
+  setup_V_motors();
+
+  pinMode(light, OUTPUT);
+
+  // Initialize valve pins
+  setupDCV();
+
+  // Initialize BNO055 sensor
+  setupBno();
+
+  // turn off all motors
+  stopMotors();
+  delay(2000);
+
+  #ifdef TEST_MOTORS 
+  testMotors();
+  delay(TIME_FOR_TESTING_MOTORS);
+  stopMotors();
+  #endif
+
+  #ifdef CHECK_ALL_SYSTEM
+  checkAllSystem();
+  #endif
+}
+
+
+
+void loop() {
+
+  main();
+  
 }
