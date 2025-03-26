@@ -3,6 +3,8 @@
 #include <Adafruit_BMP280.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
+#include <ArduinoJson.h> 
+
 // Mate 2025 ROV Competition
 // Team: AU-ROBOTICS
 
@@ -183,16 +185,6 @@ Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x29, &Wire);
 float roll = 0;
 float pitch = 0;
 float yaw = 0;
-
-void imu_read() {
-  // Get Euler angles (in degrees)
-  sensors_event_t event;
-  bno.getEvent(&event);
-
-  roll = event.orientation.x;
-  pitch = event.orientation.y;
-  yaw = event.orientation.z;
-}
 
 // Pseudoinverse matrix T_inverse for FX , FY ,YAW
 double T_inverse_Horizontal[4][3] = {
@@ -586,9 +578,62 @@ void debugThrusters(){
   Serial.println();
 }
 
-/*
-Masry add ur code here ( IMU Functions )
-*/
+void imu_read() {
+  // Get Euler angles (in degrees)
+  sensors_event_t event;
+  bno.getEvent(&event);
+  
+  roll = event.orientation.x;
+  pitch = event.orientation.y;
+  yaw = event.orientation.z;
+  
+  // Get acceleration data is now handled in sendSensorData()
+}
+
+
+void sendSensorData() {
+  // Create a JSON-like string with all the required data
+  String data = "{";
+  
+  // Add thruster powers
+  data += "\"thrusters\":[";
+  for (int i = 0; i < 4; i++) {
+    data += String(outputHorizontalThrusters[i], 2);
+    if (i < 3) data += ",";
+  }
+  data += ",";
+  for (int i = 0; i < 2; i++) {
+    data += String(outputVerticalThrusters[i], 2);
+    if (i < 1) data += ",";
+  }
+  data += "],";
+  
+  // Add orientation data
+  data += "\"orientation\":{";
+  data += "\"roll\":" + String(roll, 2) + ",";
+  data += "\"pitch\":" + String(pitch, 2) + ",";
+  data += "\"yaw\":" + String(yaw, 2);
+  data += "},";
+  
+  // Add acceleration data
+  sensors_event_t linearAccelData;
+  bno.getEvent(&linearAccelData, Adafruit_BNO055::VECTOR_LINEARACCEL);
+  data += "\"acceleration\":{";
+  data += "\"x\":" + String(linearAccelData.acceleration.x, 2) + ",";
+  data += "\"y\":" + String(linearAccelData.acceleration.y, 2) + ",";
+  data += "\"z\":" + String(linearAccelData.acceleration.z, 2);
+  data += "},";
+  
+  // Add depth and temperature
+  data += "\"depth\":" + String(bmp.readAltitude(1013.25), 2) + ",";
+  data += "\"temperature\":" + String(bmp.readTemperature(), 2);
+  
+  data += "}";
+  
+  // Send the data via Serial
+  Serial.println(data);
+}
+
 // ########################################################### End of Functions ########################################################### //
 void setup() {
   Serial.begin(115200);
@@ -652,43 +697,13 @@ void loop() {
 
   // Read data from the IMU
   imu_read();
-  // Print the results
-  Serial.print("Roll: ");
-  Serial.print(roll);
-  Serial.print(" °\tPitch: ");
-  Serial.print(pitch);
-  Serial.print(" °\tYaw: ");
-  Serial.print(yaw);
-  Serial.println(" °");
 
   // PID controllers for YAW and PITCH
   operatePID();
 
-  // Read presure sensor data
-    Serial.print("Pressure = ");
-    Serial.print(bmp.readPressure() / 100.0); // Convert Pa to hPa
-    Serial.println(" hPa");
+  // Send all sensor data
+  sendSensorData();
 
-    Serial.print("Approx Altitude = ");
-    Serial.print(bmp.readAltitude(1013.25)); // Standard pressure at sea level
-    Serial.println(" m");
-
-  // Read temperature sensor data
-    Serial.print("Temperature = ");
-    Serial.print(bmp.readTemperature());
-    Serial.println(" *C");
-
-// prepare data frame to be sent contating the thruster values of the ROV all the angles and accelerations the depth and the temperature
-
-/* Masry add ur code here */
-
-  // Print the results
-  Serial.print("Roll: ");
-  Serial.print(roll);
-  Serial.print(" °\tPitch: ");
-  Serial.print(pitch);
-  Serial.print(" °\tYaw: ");
-  Serial.print(yaw);
-  Serial.println(" °");
+  delay(100);
   
 }
