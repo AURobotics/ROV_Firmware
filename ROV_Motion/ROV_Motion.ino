@@ -18,7 +18,7 @@
 
 // un comment what you need to debug 
 //#define DEBUG_PID_YAW 1
-#define DEBUG_PID_PITCH 1
+//#define DEBUG_PID_PITCH 1
 #define DEBUG_THRUSTERS 1
 //#define TEST_MOTORS 1
 //#define CHECK_ALL_SYSTEM 1
@@ -136,7 +136,7 @@
 #define incoming_data_length 9
 
 // Define the serial timeout in milliseconds
-#define serial_timeout_ms 1000
+#define serial_timeout_ms 10000
 
 #define TIME_FOR_TESTING_MOTORS 5000
 
@@ -655,7 +655,7 @@ void dcv1Control(bool state) {
   // if the state is true, open the valve
   // if the state is false, close the valve
   // DCV is just a DC motor
-  digitalWrite(valvePins[0], state ? HIGH : LOW);
+  digitalWrite(dcv1, state ? HIGH : LOW);
   Serial.print("DC Valve 1: ");
   Serial.println(state);
 }
@@ -665,7 +665,7 @@ void dcv2Control(bool state) {
   // if the state is true, open the valve
   // if the state is false, close the valve
   // DCV is just a DC motor
-  digitalWrite(valvePins[1], state ? HIGH : LOW);
+  digitalWrite(dcv2, state ? HIGH : LOW);
   Serial.print("DC Valve 2: ");
   Serial.println(state);
 }
@@ -721,9 +721,9 @@ void checkPitchPid(){
 void checkYawPid(){
   if (Serial.available() > 0) {
     char incoming = Serial.read();
-    if (incoming == 's') {
+    if (incoming == 'm') {
       NULL_INPUT_YAW_FLAG = 0;
-    } else if (incoming == 'e') {
+    } else if (incoming == 'n') {
       NULL_INPUT_YAW_FLAG = 1;
     }
   }
@@ -763,6 +763,7 @@ void checkSerial(){
   if (millis() - last_time_data_received > serial_timeout_ms) {
     stopMotors();
     controlMotors();
+    Serial.print("No connection   ") ;
   }
 }
 
@@ -797,7 +798,7 @@ void checkSerialDataAndControlMotors(){
   debugThrusters();
 }
 
-void main(){
+void mainC(){
   // Read the incoming data from the serial port
   readIncomingData();
 
@@ -873,12 +874,13 @@ void setup() {
   #ifdef CHECK_ALL_SYSTEM
   checkAllSystem();
   #endif
+
 }
 
 
 
 void loop() {
 
-  main();
+  mainC();
   
 }
