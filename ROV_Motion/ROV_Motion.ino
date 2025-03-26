@@ -3,6 +3,7 @@
 #include <Adafruit_BMP280.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
+#include <ArduinoJson.h>
 
 // Mate 2025 ROV Competition
 // Team: AU-ROBOTICS
@@ -797,6 +798,67 @@ void checkSerialDataAndControlMotors(){
   debugThrusters();
 }
 
+void sendSensorData() {
+  /*
+  All 6 thruster values (4 horizontal + 2 vertical)
+
+  Orientation data (roll, pitch, yaw)
+
+  Linear acceleration (x, y, z)
+
+  System status (LED and DC valves states)
+
+  Example output:
+  {
+  "thrusters":{"h1":125.5,"h2":130.2,"h3":-110.8,"h4":115.0,"v1":80.5,"v2":-90.2},
+  "orientation":{"roll":1.25,"pitch":-0.75,"yaw":45.50},
+  "acceleration":{"x":0.12,"y":-0.05,"z":9.78},
+  "status":{"led":true,"dcv1":false,"dcv2":false}
+  }
+  */
+
+
+  // Create a JSON-like string with all required data
+  String data = "{";
+  
+  // Add thruster powers
+  data += "\"thrusters\":{";
+  data += "\"h1\":" + String(outputHorizontalThrusters[0], 1) + ",";
+  data += "\"h2\":" + String(outputHorizontalThrusters[1], 1) + ",";
+  data += "\"h3\":" + String(outputHorizontalThrusters[2], 1) + ",";
+  data += "\"h4\":" + String(outputHorizontalThrusters[3], 1) + ",";
+  data += "\"v1\":" + String(outputVerticalThrusters[0], 1) + ",";
+  data += "\"v2\":" + String(outputVerticalThrusters[1], 1);
+  data += "},";
+  
+  // Add orientation data
+  data += "\"orientation\":{";
+  data += "\"roll\":" + String(rollAngle, 2) + ",";
+  data += "\"pitch\":" + String(pitchAngle, 2) + ",";
+  data += "\"yaw\":" + String(yawAngle, 2);
+  data += "},";
+  
+  // Add acceleration data
+  imu::Vector<3> accel = Bno.getVector(Adafruit_BNO055::VECTOR_LINEARACCEL);
+  data += "\"acceleration\":{";
+  data += "\"x\":" + String(accel.x(), 2) + ",";
+  data += "\"y\":" + String(accel.y(), 2) + ",";
+  data += "\"z\":" + String(accel.z(), 2);
+  data += "},";
+  
+  // Add system status
+  data += "\"status\":{";
+  data += "\"led\":" + String(ledState ? "true" : "false") + ",";
+  data += "\"dcv1\":" + String(dcv1State ? "true" : "false") + ",";
+  data += "\"dcv2\":" + String(dcv2State ? "true" : "false");
+  data += "}";
+  
+  data += "}";
+  
+  // Send the data via Serial
+  Serial.println(data);
+}
+
 void main(){
   // Read the incoming data from the serial port
   readIncomingData();
@@ -834,11 +896,9 @@ void main(){
   dcv2Control(dcv2State);
 
 
-  // prepare data frame to be sent contating the thruster values of the ROV all the angles and accelerations the depth and the temperature
+   // Send sensor data to station
+   sendSensorData();
 
-  /* ziyad add ur code here */
-
-  // Print the results
 }
 /*
 Masry add ur code here ( IMU Functions )
@@ -880,5 +940,6 @@ void setup() {
 void loop() {
 
   main();
-  
+  /* delay(50); // not sure if this is correct but adding delay to help sending data smoothly over 20 khz (commented till expreminted) */ 
+
 }
