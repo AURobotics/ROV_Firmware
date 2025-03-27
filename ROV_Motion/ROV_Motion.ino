@@ -431,7 +431,7 @@ void PID_PITCH(bool start_PITCH_PID) {
 
 // Lights control
 void turnLight(bool state) {
-  analogWrite(light, state ? 127 : 0);
+  digitalWrite(light, state ? HIGH : LOW);
 }
 
 // setup horizontal thrusters
