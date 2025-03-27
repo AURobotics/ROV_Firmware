@@ -15,15 +15,14 @@
 // The code reads the input forces from the PI and computes the thruster forces required to achieve the desired motion
 // The code then applies constraints to the thruster forces and sends the PWM signals to the thrusters to achieve the desired motion
 
-//####################################################### Debugging Defines ########################################################### //
+// ####################################################### Debugging Defines ########################################################### //
 
-// un comment what you need to debug 
-//#define DEBUG_PID_YAW 1
-//#define DEBUG_PID_PITCH 1
+// un comment what you need to debug
+// #define DEBUG_PID_YAW 1
+// #define DEBUG_PID_PITCH 1
 #define DEBUG_THRUSTERS 1
-//#define TEST_MOTORS 1
-//#define CHECK_ALL_SYSTEM 1
-
+// #define TEST_MOTORS 1
+// #define CHECK_ALL_SYSTEM 1
 
 // ########################################################### Defines ########################################################### //
 
@@ -50,11 +49,9 @@
 #define motor6PwmA 27
 #define motor6PwmB 14
 
-
 // A //-> written D // motor 1
 #define dirH1 motor1Dir
 #define pwmH1 motor1Pwm
-
 
 // B // -> written D
 #define dirH2 motor2Dir
@@ -110,7 +107,6 @@
 #define tau_max_input 173.4
 #define fz_max_input 512.0
 #define tpitch_max_input 102.0
-
 
 // Define the maximum output values for the forces
 // Fx, Fy, Tau, Fz, Tpitch
@@ -203,7 +199,6 @@ float outputVerticalThrusters[2] = { 0, 0 };
 
 // The computed values for the thrusters are kept in this array
 
-
 // Communication
 // Define the length of the incoming data from the PI (in bytes)
 
@@ -238,7 +233,6 @@ unsigned long last_time_data_received = 0;
 // Create BNO055 object
 Adafruit_BNO055 Bno(1, BNO055_ADDRESS_B);
 
-
 void correctYawAngle() {
   if (yawAngle > 0 && yawAngle <= 180) {
     yawAngle = yawAngle;
@@ -259,9 +253,7 @@ double T_inverse_Vertical[2][2] = {
   { 0.5, -2.5 }
 };
 
-
 // ########################################################### End of gloabl variables ########################################################### //
-
 
 // ########################################################### PID Controllers ########################################################### //
 
@@ -276,10 +268,10 @@ bool flag_YAW_PID = false;
 // PID controller for YAW
 /**
  * PID_YAW - PID controller for YAW motion control.
- * 
- * This function calculates the output for the YAW motion control based on the 
- * setpoint and the current input. It uses a PID controller to minimize the error 
- * between the setpoint and the input. The function should be called periodically 
+ *
+ * This function calculates the output for the YAW motion control based on the
+ * setpoint and the current input. It uses a PID controller to minimize the error
+ * between the setpoint and the input. The function should be called periodically
  * to update the output.
 static unsigned long lastTime = 0;
 unsigned long now = millis();
@@ -354,14 +346,14 @@ float maxOutputPitch = 102, minOutputPitch = -102;
 // flag to see if the PID controller is active or not
 bool flag_PITCH_PID = false;
 // PID controller for PITCH
-/** 
+/**
  * PID_PITCH - PID controller for PITCH motion control.
- * 
- * This function calculates the output for the PITCH motion control based on the 
- * setpoint and the current input. It uses a PID controller to minimize the error 
- * between the setpoint and the input. The function should be called periodically 
+ *
+ * This function calculates the output for the PITCH motion control based on the
+ * setpoint and the current input. It uses a PID controller to minimize the error
+ * between the setpoint and the input. The function should be called periodically
  * to update the output.
- * 
+ *
  * @param start_PITCH_PID - If true, the PID controller is active and updates the output.
  *                          If false, the PID controller is reset and the output is set to zero.
  */
@@ -400,7 +392,7 @@ void PID_PITCH(bool start_PITCH_PID) {
 
       // constrain the output
       outputPitch = constrain(outputPitch, minOutputPitch, maxOutputPitch);
-  #ifdef DEBUG_PID_PITCH
+#ifdef DEBUG_PID_PITCH
       Serial.print("dt : ");
       Serial.print(dt);
       Serial.print(" Error : ");
@@ -415,7 +407,7 @@ void PID_PITCH(bool start_PITCH_PID) {
       Serial.print(inputPitch);
       Serial.print(" Pitch output : ");
       Serial.println(outputPitch);
-  #endif
+#endif
     }
   } else {
     // Reset the PID controller
@@ -504,7 +496,7 @@ void controlMotors() {
 
 // Apply constraints to the thruster forces
 // if the maximum absolute force exceeds the max allowed force, scale down
-void applyConstraints(float* thruster_forces, int size, float max_force) {
+void applyConstraints(float *thruster_forces, int size, float max_force) {
   float max_abs_force = 0;
 
   // Find the maximum absolute value of the thruster forces
@@ -524,7 +516,7 @@ void applyConstraints(float* thruster_forces, int size, float max_force) {
 }
 
 // compute horizontal forces
-void ComputeHorrizontalThrustForces(double* input, double T_inverse[4][3], float* outputThrusters) {
+void ComputeHorrizontalThrustForces(double *input, double T_inverse[4][3], float *outputThrusters) {
 
   // Perform matrix multiplication outputThrusters = T_inverse * input
 
@@ -540,7 +532,7 @@ void ComputeHorrizontalThrustForces(double* input, double T_inverse[4][3], float
 }
 
 // compute vertical forces
-void ComputeVerticalThrustForces(double* input, double T_inverse[2][2], float* outputThrusters) {
+void ComputeVerticalThrustForces(double *input, double T_inverse[2][2], float *outputThrusters) {
 
   // Perform matrix multiplication outputThrusters = T_inverse * input
 
@@ -555,7 +547,7 @@ void ComputeVerticalThrustForces(double* input, double T_inverse[2][2], float* o
   applyConstraints(outputThrusters, 2, max_force);
 }
 
-void calculateThrust(){
+void calculateThrust() {
   // Compute the thruster forces for the horizontal thrusters
   ComputeHorrizontalThrustForces(inputH, T_inverse_Horizontal, outputHorizontalThrusters);
 
@@ -708,7 +700,7 @@ void debugSensors() {
   Serial.print(rollAngle);
   Serial.println();
 }
-void checkPitchPid(){
+void checkPitchPid() {
   if (Serial.available() > 0) {
     char incoming = Serial.read();
     if (incoming == 's') {
@@ -719,7 +711,7 @@ void checkPitchPid(){
   }
 }
 
-void checkYawPid(){
+void checkYawPid() {
   if (Serial.available() > 0) {
     char incoming = Serial.read();
     if (incoming == 'm') {
@@ -736,7 +728,7 @@ void setupBno() {
   }
 }
 
-void stopMotors(){
+void stopMotors() {
   outputHorizontalThrusters[0] = 0;
   outputHorizontalThrusters[1] = 0;
   outputHorizontalThrusters[2] = 0;
@@ -748,7 +740,7 @@ void stopMotors(){
   controlMotors();
 }
 
-void testMotors(){
+void testMotors() {
   outputHorizontalThrusters[0] = 255;
   outputHorizontalThrusters[1] = 255;
   outputHorizontalThrusters[2] = 255;
@@ -760,15 +752,15 @@ void testMotors(){
   controlMotors();
 }
 
-void checkSerial(){
+void checkSerial() {
   if (millis() - last_time_data_received > serial_timeout_ms) {
     stopMotors();
     controlMotors();
-    Serial.print("No connection   ") ;
+    Serial.print("No connection   ");
   }
 }
 
-void checkAllSystem(){
+void checkAllSystem() {
   testMotors();
   delay(2000);
   stopMotors();
@@ -789,7 +781,7 @@ void checkAllSystem(){
   Serial.println("All systems are working fine from Guileta");
 }
 
-void checkSerialDataAndControlMotors(){
+void checkSerialDataAndControlMotors() {
   readIncomingData();
   imu_read();
   correctYawAngle();
@@ -818,10 +810,9 @@ void sendSensorData() {
   }
   */
 
-
   // Create a JSON-like string with all required data
   String data = "{";
-  
+
   // Add thruster powers
   data += "\"thrusters\":{";
   data += "\"h1\":" + String(outputHorizontalThrusters[0], 1) + ",";
@@ -831,14 +822,14 @@ void sendSensorData() {
   data += "\"v1\":" + String(outputVerticalThrusters[0], 1) + ",";
   data += "\"v2\":" + String(outputVerticalThrusters[1], 1);
   data += "},";
-  
+
   // Add orientation data
   data += "\"orientation\":{";
   data += "\"roll\":" + String(rollAngle, 2) + ",";
   data += "\"pitch\":" + String(pitchAngle, 2) + ",";
   data += "\"yaw\":" + String(yawAngle, 2);
   data += "},";
-  
+
   // Add acceleration data
   imu::Vector<3> accel = Bno.getVector(Adafruit_BNO055::VECTOR_LINEARACCEL);
   data += "\"acceleration\":{";
@@ -846,21 +837,21 @@ void sendSensorData() {
   data += "\"y\":" + String(accel.y(), 2) + ",";
   data += "\"z\":" + String(accel.z(), 2);
   data += "},";
-  
+
   // Add system status
   data += "\"status\":{";
   data += "\"led\":" + String(ledState ? "true" : "false") + ",";
   data += "\"dcv1\":" + String(dcv1State ? "true" : "false") + ",";
   data += "\"dcv2\":" + String(dcv2State ? "true" : "false");
   data += "}";
-  
+
   data += "}";
-  
+
   // Send the data via Serial
   Serial.println(data);
 }
 
-void mainC(){
+void mainC() {
   // Read the incoming data from the serial port
   readIncomingData();
 
@@ -876,10 +867,10 @@ void mainC(){
   // Calculate the thruster forces
   calculateThrust();
 
-  // Debug the thrusters
-  #ifdef DEBUG_THRUSTERS
+// Debug the thrusters
+#ifdef DEBUG_THRUSTERS
   debugThrusters();
-  #endif
+#endif
 
   // check that the serial is still working if not stop the motors
   checkSerial();
@@ -898,7 +889,6 @@ void mainC(){
 
   // Send sensor data to station
   sendSensorData();
-
 }
 /*
 Masry add ur code here ( IMU Functions )
@@ -924,23 +914,18 @@ void setup() {
   stopMotors();
   delay(2000);
 
-  #ifdef TEST_MOTORS 
+#ifdef TEST_MOTORS
   testMotors();
   delay(TIME_FOR_TESTING_MOTORS);
   stopMotors();
-  #endif
+#endif
 
-  #ifdef CHECK_ALL_SYSTEM
+#ifdef CHECK_ALL_SYSTEM
   checkAllSystem();
-  #endif
-
+#endif
 }
-
-
 
 void loop() {
 
   mainC();
-  
-
 }
