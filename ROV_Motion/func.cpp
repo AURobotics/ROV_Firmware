@@ -434,13 +434,15 @@ void sendSensorData() {
 
 void mainC() {
   // Read the incoming data from the serial port
-  readIncomingData();
+  //readIncomingData();
 
   // Read data from the IMU
   imu_read();
 
   // Correct the yaw angle to be between -180 and 180
   correctYawAngle();
+
+  checkYawPid();
 
   // PID controllers for YAW and PITCH
   operatePID();
@@ -454,22 +456,22 @@ void mainC() {
 #endif
 
   // check that the serial is still working if not stop the motors
-  checkSerial();
+  // checkSerial();
 
-  // control the motors
-  controlMotors();
+  // // control the motors
+  // controlMotors();
 
-  // Turn the light on or off
-  turnLight(ledState);
+  // // Turn the light on or off
+  // turnLight(ledState);
 
-  // Control the DC valve 1
-  dcv1Control(dcv1State);
+  // // Control the DC valve 1
+  // dcv1Control(dcv1State);
 
-  // Control the DC valve 2
-  dcv2Control(dcv2State);
+  // // Control the DC valve 2
+  // dcv2Control(dcv2State);
 
-  // Send sensor data to station
-  sendSensorData();
+  // // Send sensor data to station
+  // sendSensorData();
 }
 
 // ########################################################### End of Functions ########################################################### //

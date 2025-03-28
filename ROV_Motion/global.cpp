@@ -58,6 +58,6 @@ void correctYawAngle() {
   if (yawAngle > 0 && yawAngle <= 180) {
     yawAngle = -yawAngle;
   } else if (yawAngle > 180 && yawAngle <= 360) {
-    yawAngle = -yawAngle - 360;
+    yawAngle = -(yawAngle - 360);
   }
 }
