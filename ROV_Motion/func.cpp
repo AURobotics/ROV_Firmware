@@ -190,6 +190,18 @@ void operatePID() {
     flag_YAW_PID = true;
     // set the input yaw angle
     inputYaw = yawAngle;
+    // handle if the difference between the setpoint and the input yaw angle is greater than 180 degrees
+    if (abs(setpointYaw - inputYaw) > 180) {
+      if (setpointYaw > inputYaw) {
+        // e.g. setpoint = 170, input = -170 => difference = 340,
+        //      fix => setpoint = 170 - 360 = -190, input = -170 => difference = 20
+        setpointYaw -= 360;
+      } else {
+        // e.g. setpoint = -170, input = 170 => difference = 340,
+        //      fix => setpoint = -170 + 360 = 190, input = 170 => difference = 20
+        setpointYaw += 360;
+      }
+    }
     // Start the PID controller for YAW
     PID_YAW(true);
     // set the output yaw torque
@@ -442,6 +454,16 @@ void mainC() {
   // Correct the yaw angle to be between -180 and 180
   correctYawAngle();
 
+// if u need to debug PID for yaw just un comment in thedebug section
+#ifdef DEBUG_PID_YAW
+  checkYawPid();
+#endif
+
+// if u need to debug PID for pitch just un comment in thedebug section
+#ifdef DEBUG_PID_PITCH
+  checkPitchPid();
+#endif
+
   // PID controllers for YAW and PITCH
   operatePID();
 
@@ -453,7 +475,7 @@ void mainC() {
   debugThrusters();
 #endif
 
-  // check that the serial is still working if not stop the motors
+  //check that the serial is still working if not stop the motors
   checkSerial();
 
   // control the motors

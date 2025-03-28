@@ -56,8 +56,8 @@ double T_inverse_Vertical[2][2] = {
 // Function implementation
 void correctYawAngle() {
   if (yawAngle > 0 && yawAngle <= 180) {
-    yawAngle = yawAngle;
+    yawAngle = -yawAngle;
   } else if (yawAngle > 180 && yawAngle <= 360) {
-    yawAngle = yawAngle - 360;
+    yawAngle = -yawAngle + 360;
   }
 }
