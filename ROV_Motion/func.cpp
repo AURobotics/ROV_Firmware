@@ -190,6 +190,18 @@ void operatePID() {
     flag_YAW_PID = true;
     // set the input yaw angle
     inputYaw = yawAngle;
+    // handle if the difference between the setpoint and the input yaw angle is greater than 180 degrees
+    if (abs(setpointYaw - inputYaw) > 180) {
+      if (setpointYaw > inputYaw) {
+        // e.g. setpoint = 170, input = -170 => difference = 340,
+        //      fix => setpoint = 170 - 360 = -190, input = -170 => difference = 20
+        setpointYaw -= 360;
+      } else {
+        // e.g. setpoint = -170, input = 170 => difference = 340,
+        //      fix => setpoint = -170 + 360 = 190, input = 170 => difference = 20
+        setpointYaw += 360;
+      }
+    }
     // Start the PID controller for YAW
     PID_YAW(true);
     // set the output yaw torque
