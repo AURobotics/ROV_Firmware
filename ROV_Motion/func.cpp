@@ -258,9 +258,30 @@ void dcv2Control(bool state) {
 
 // IMU functions
 
+void setupBno() {
+  // Initialize BNO055 sensor
+  if (!Bno.begin()) {
+    Serial.println("BNO055 not detected!");
+  }
+  /*
+  Remap Configuration | X Output  | Y Output | Z Output
+  --------------------|-----------|----------|----------
+  REMAP_CONFIG_P0     |  X        |  Y       |  Z
+  REMAP_CONFIG_P1     |  X        | -Y       | -Z
+  REMAP_CONFIG_P2     | -X        |  Y       | -Z
+  REMAP_CONFIG_P3     | -X        | -Y       |  Z
+  REMAP_CONFIG_P4     | -Z        |  X       | -Y
+  REMAP_CONFIG_P5     |  Z        |  X       |  Y
+  REMAP_CONFIG_P6     | -Z        | -X       |  Y
+  REMAP_CONFIG_P7     |  Z        | -X       | -Y
+  */
+  Bno.setAxisRemap(Adafruit_BNO055::REMAP_CONFIG_P0);
+}
+
 void imu_read() {
   // Get Euler angles (in degrees)
   imu::Vector<3> myData = Bno.getVector(Adafruit_BNO055::VECTOR_EULER);
+  // Might need to remap the angles to match the ROV's orientation
   yawAngle = myData.x();
   rollAngle = myData.y();
   pitchAngle = myData.z();
@@ -284,6 +305,7 @@ void debugThrusters() {
 
   Serial.println();
 }
+
 void debugSensors() {
   imu_read();
   Serial.print(yawAngle);
@@ -293,6 +315,7 @@ void debugSensors() {
   Serial.print(rollAngle);
   Serial.println();
 }
+
 void checkPitchPid() {
   if (Serial.available() > 0) {
     char incoming = Serial.read();
@@ -312,12 +335,6 @@ void checkYawPid() {
     } else if (incoming == 'n') {
       NULL_INPUT_YAW_FLAG = 1;
     }
-  }
-}
-void setupBno() {
-  // Initialize BNO055 sensor
-  if (!Bno.begin()) {
-    Serial.println("BNO055 not detected!");
   }
 }
 
