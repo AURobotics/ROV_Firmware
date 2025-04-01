@@ -5,7 +5,6 @@
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
 #include <Arduino.h>
-#include <ArduinoJson.h>
 #include "global.h"
 #include "debug.h"
 #include "pid.h"
