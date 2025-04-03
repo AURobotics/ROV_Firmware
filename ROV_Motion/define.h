@@ -121,6 +121,8 @@
 // Define the serial timeout in milliseconds
 #define serial_timeout_ms 1000
 
+#define serial_feedback_ms 33
+
 #define TIME_FOR_TESTING_MOTORS 5000
 
 // Axis remap configuration

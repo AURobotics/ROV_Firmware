@@ -3,13 +3,15 @@
 // ########################################################### Functions ########################################################### //
 
 // Lights control
-void turnLight(bool state) {
+void turnLight(bool state)
+{
   digitalWrite(led, state ? HIGH : LOW);
 }
 
 // setup horizontal thrusters
 
-void setup_H_motors() {
+void setup_H_motors()
+{
 
   pinMode(dirH1, OUTPUT);
   pinMode(pwmH1, OUTPUT);
@@ -25,48 +27,58 @@ void setup_H_motors() {
 }
 
 // setup vertical thrusters
-void setup_V_motors() {
+void setup_V_motors()
+{
 
   pinMode(pwmV1_1, OUTPUT);
   pinMode(pwmV1_2, OUTPUT);
   pinMode(enV1, OUTPUT);
 
-  digitalWrite(enV1, HIGH);  // enable the bts
+  digitalWrite(enV1, HIGH); // enable the bts
 
   pinMode(pwmV2_1, OUTPUT);
   pinMode(pwmV2_2, OUTPUT);
   pinMode(enV2, OUTPUT);
 
-  digitalWrite(enV2, HIGH);  // enable the bts
+  digitalWrite(enV2, HIGH); // enable the bts
 }
 
 // control horizontal motors
-void controlHmotors() {
-  for (int num = 0; num <= 3; num++) {
-    digitalWrite(HorizontalThrusterPinsDir[num], (outputHorizontalThrusters[num] >= 0) ? HIGH : LOW);  // control direction
-    analogWrite(HorizontalThrusterPinsSpeed[num], int(abs(outputHorizontalThrusters[num])));           // control speed
+void controlHmotors()
+{
+  for (int num = 0; num <= 3; num++)
+  {
+    digitalWrite(HorizontalThrusterPinsDir[num], (outputHorizontalThrusters[num] >= 0) ? HIGH : LOW); // control direction
+    analogWrite(HorizontalThrusterPinsSpeed[num], int(abs(outputHorizontalThrusters[num])));          // control speed
   }
 }
 
 // control vertical motors
-void controlVmotors() {
-  for (int num = 0; num <= 1; num++) {
-    if (outputVerticalThrusters[num] >= 0) {
-      analogWrite(VerticalThrusterSp1[num], int(abs(outputVerticalThrusters[num])));  // control speed
-      analogWrite(VerticalThrusterSp2[num], 0);                                       // control speed
-    } else {
-      analogWrite(VerticalThrusterSp1[num], 0);                                       // control speed
-      analogWrite(VerticalThrusterSp2[num], int(abs(outputVerticalThrusters[num])));  // control speed
+void controlVmotors()
+{
+  for (int num = 0; num <= 1; num++)
+  {
+    if (outputVerticalThrusters[num] >= 0)
+    {
+      analogWrite(VerticalThrusterSp1[num], int(abs(outputVerticalThrusters[num]))); // control speed
+      analogWrite(VerticalThrusterSp2[num], 0);                                      // control speed
+    }
+    else
+    {
+      analogWrite(VerticalThrusterSp1[num], 0);                                      // control speed
+      analogWrite(VerticalThrusterSp2[num], int(abs(outputVerticalThrusters[num]))); // control speed
     }
   }
 }
 
-void setupDCV() {
+void setupDCV()
+{
   pinMode(dcv1, OUTPUT);
   pinMode(dcv2, OUTPUT);
 }
 
-void controlMotors() {
+void controlMotors()
+{
   // control horizontal motors
   controlHmotors();
   // control vertical motors
@@ -77,33 +89,41 @@ void controlMotors() {
 
 // Apply constraints to the thruster forces
 // if the maximum absolute force exceeds the max allowed force, scale down
-void applyConstraints(float *thruster_forces, int size, float max_force) {
+void applyConstraints(float *thruster_forces, int size, float max_force)
+{
   float max_abs_force = 0;
 
   // Find the maximum absolute value of the thruster forces
-  for (int i = 0; i < size; i++) {
-    if (abs(thruster_forces[i]) > max_abs_force) {
+  for (int i = 0; i < size; i++)
+  {
+    if (abs(thruster_forces[i]) > max_abs_force)
+    {
       max_abs_force = abs(thruster_forces[i]);
     }
   }
 
   // If the maximum absolute force exceeds the max allowed force, scale down
-  if (max_abs_force > max_force) {
+  if (max_abs_force > max_force)
+  {
     float scaling_factor = max_force / max_abs_force;
-    for (int i = 0; i < size; i++) {
-      thruster_forces[i] *= scaling_factor;  // Apply the scaling factor
+    for (int i = 0; i < size; i++)
+    {
+      thruster_forces[i] *= scaling_factor; // Apply the scaling factor
     }
   }
 }
 
 // compute horizontal forces
-void ComputeHorrizontalThrustForces(double *input, double T_inverse[4][3], float *outputThrusters) {
+void ComputeHorrizontalThrustForces(double *input, double T_inverse[4][3], float *outputThrusters)
+{
 
   // Perform matrix multiplication outputThrusters = T_inverse * input
 
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < 4; i++)
+  {
     outputThrusters[i] = 0;
-    for (int j = 0; j < 3; j++) {
+    for (int j = 0; j < 3; j++)
+    {
       outputThrusters[i] += T_inverse[i][j] * input[j];
     }
   }
@@ -113,13 +133,16 @@ void ComputeHorrizontalThrustForces(double *input, double T_inverse[4][3], float
 }
 
 // compute vertical forces
-void ComputeVerticalThrustForces(double *input, double T_inverse[2][2], float *outputThrusters) {
+void ComputeVerticalThrustForces(double *input, double T_inverse[2][2], float *outputThrusters)
+{
 
   // Perform matrix multiplication outputThrusters = T_inverse * input
 
-  for (int i = 0; i < 2; i++) {
+  for (int i = 0; i < 2; i++)
+  {
     outputThrusters[i] = 0;
-    for (int j = 0; j < 2; j++) {
+    for (int j = 0; j < 2; j++)
+    {
       outputThrusters[i] += T_inverse[i][j] * input[j];
     }
   }
@@ -128,7 +151,8 @@ void ComputeVerticalThrustForces(double *input, double T_inverse[2][2], float *o
   applyConstraints(outputThrusters, 2, max_force);
 }
 
-void calculateThrust() {
+void calculateThrust()
+{
   // Compute the thruster forces for the horizontal thrusters
   ComputeHorrizontalThrustForces(inputH, T_inverse_Horizontal, outputHorizontalThrusters);
 
@@ -136,8 +160,10 @@ void calculateThrust() {
   ComputeVerticalThrustForces(inputV, T_inverse_Vertical, outputVerticalThrusters);
 }
 
-void readIncomingData() {
-  if (Serial.available()) {
+void readIncomingData()
+{
+  if (Serial.available())
+  {
     last_time_data_received = millis();
     // Read the incoming data from the serial port
     Serial.readBytesUntil(terminator, incoming, incoming_data_length);
@@ -148,23 +174,25 @@ void readIncomingData() {
 
     // Validate checksum (Byte 7 should be XOR of Bytes 0-6)
     byte xorCheck = 0;
-    for (int i = 0; i <= 6; i++) {
+    for (int i = 0; i <= 6; i++)
+    {
       xorCheck ^= incoming[i];
     }
 
-    if (incoming[7] != xorCheck) {
+    if (incoming[7] != xorCheck)
+    {
       Serial.println("Checksum error! Ignoring packet.");
       return;
     }
 
     // Read the input forces
-    inputH[fx_index_inputH] = (float)incoming[fx_index_incoming_data] * (fx_max_input / fx_max_output) * ((incoming[sign_byte_index_incoming_data] & (1 << fx_index_incoming_data)) ? -1 : 1);       // Fx
-    inputH[fy_index_inputH] = (float)incoming[fy_index_incoming_data] * (fy_max_input / fy_max_output) * ((incoming[sign_byte_index_incoming_data] & (1 << fy_index_incoming_data)) ? -1 : 1);       // Fy
-    inputH[tau_index_inputH] = (float)incoming[tau_index_incoming_data] * (tau_max_input / tau_max_output) * ((incoming[sign_byte_index_incoming_data] & (1 << tau_index_incoming_data)) ? -1 : 1);  // Tau
+    inputH[fx_index_inputH] = (float)incoming[fx_index_incoming_data] * (fx_max_input / fx_max_output) * ((incoming[sign_byte_index_incoming_data] & (1 << fx_index_incoming_data)) ? -1 : 1);      // Fx
+    inputH[fy_index_inputH] = (float)incoming[fy_index_incoming_data] * (fy_max_input / fy_max_output) * ((incoming[sign_byte_index_incoming_data] & (1 << fy_index_incoming_data)) ? -1 : 1);      // Fy
+    inputH[tau_index_inputH] = (float)incoming[tau_index_incoming_data] * (tau_max_input / tau_max_output) * ((incoming[sign_byte_index_incoming_data] & (1 << tau_index_incoming_data)) ? -1 : 1); // Tau
 
     // Vertical forces
-    inputV[fz_index_inputV] = (float)incoming[fz_index_incoming_data] * (fz_max_input / fz_max_output) * ((incoming[sign_byte_index_incoming_data] & (1 << fz_index_incoming_data)) ? -1 : 1);                      // Fz
-    inputV[tpitch_index_inputV] = (float)incoming[tpitch_index_incoming_data] * (tpitch_max_input / tpitch_max_output) * ((incoming[sign_byte_index_incoming_data] & (1 << tpitch_index_incoming_data)) ? -1 : 1);  // Tpitch
+    inputV[fz_index_inputV] = (float)incoming[fz_index_incoming_data] * (fz_max_input / fz_max_output) * ((incoming[sign_byte_index_incoming_data] & (1 << fz_index_incoming_data)) ? -1 : 1);                     // Fz
+    inputV[tpitch_index_inputV] = (float)incoming[tpitch_index_incoming_data] * (tpitch_max_input / tpitch_max_output) * ((incoming[sign_byte_index_incoming_data] & (1 << tpitch_index_incoming_data)) ? -1 : 1); // Tpitch
 
     // Read the LED state
     ledState = incoming[led_index_incoming_data] & (1 << led_index_input);
@@ -178,11 +206,13 @@ void readIncomingData() {
   }
 }
 
-void operatePID() {
+void operatePID()
+{
   // Check if the input forces are zero for YAW
   // If the input forces are zero, start the PID controller for YAW
   // If the input forces are not zero, stop the PID controller for YAW
-  if (NULL_INPUT_YAW_FLAG) {
+  if (NULL_INPUT_YAW_FLAG)
+  {
     // if its the first time to start the PID controller, set the setpoint to the current yaw angle
     // if its not the first time, keep the setpoint as it is
     flag_YAW_PID ? (setpointYaw = setpointYaw) : (setpointYaw = yawAngle);
@@ -191,12 +221,16 @@ void operatePID() {
     // set the input yaw angle
     inputYaw = yawAngle;
     // handle if the difference between the setpoint and the input yaw angle is greater than 180 degrees
-    if (abs(setpointYaw - inputYaw) > 180) {
-      if (setpointYaw > inputYaw) {
+    if (abs(setpointYaw - inputYaw) > 180)
+    {
+      if (setpointYaw > inputYaw)
+      {
         // e.g. setpoint = 170, input = -170 => difference = 340,
         //      fix => setpoint = 170 - 360 = -190, input = -170 => difference = 20
         setpointYaw -= 360;
-      } else {
+      }
+      else
+      {
         // e.g. setpoint = -170, input = 170 => difference = 340,
         //      fix => setpoint = -170 + 360 = 190, input = 170 => difference = 20
         setpointYaw += 360;
@@ -206,7 +240,9 @@ void operatePID() {
     PID_YAW(true);
     // set the output yaw torque
     inputH[tau_index_inputH] = outputYaw;
-  } else {
+  }
+  else
+  {
     // Stop the PID controller for YAW
     PID_YAW(false);
     // set the flag to false
@@ -216,7 +252,8 @@ void operatePID() {
   // Check if the input forces are zero for PITCH
   // If the input forces are zero, start the PID controller for PITCH
   // If the input forces are not zero, stop the PID controller for PITCH
-  if (NULL_INPUT_PITCH_FLAG) {
+  if (NULL_INPUT_PITCH_FLAG)
+  {
     // if its the first time to start the PID controller, set the setpoint to the current pitch angle
     // if its not the first time, keep the setpoint as it is
     flag_PITCH_PID ? (setpointPitch = setpointPitch) : (setpointPitch = pitchAngle);
@@ -228,7 +265,9 @@ void operatePID() {
     PID_PITCH(true);
     // set the output pitch torque
     inputV[tpitch_index_inputV] = outputPitch;
-  } else {
+  }
+  else
+  {
     // Stop the PID controller for PITCH
     PID_PITCH(false);
     // set the flag to false
@@ -236,38 +275,39 @@ void operatePID() {
   }
 }
 
-void dcv1Control(bool state) {
+void dcv1Control(bool state)
+{
   // control the DC valve 1
   // if the state is true, open the valve
   // if the state is false, close the valve
   // DCV is just a DC motor
   digitalWrite(dcv1, state ? HIGH : LOW);
-  Serial.print("DC Valve 1: ");
-  Serial.println(state);
 }
 
-void dcv2Control(bool state) {
+void dcv2Control(bool state)
+{
   // control the DC valve 2
   // if the state is true, open the valve
   // if the state is false, close the valve
   // DCV is just a DC motor
   digitalWrite(dcv2, state ? HIGH : LOW);
-  Serial.print("DC Valve 2: ");
-  Serial.println(state);
 }
 
 // IMU functions
 
-void setupBno() {
+void setupBno()
+{
   // Initialize BNO055 sensor
-  if (!Bno.begin()) {
+  if (!Bno.begin())
+  {
     Serial.println("BNO055 not detected!");
   }
   Bno.setAxisRemap((Adafruit_BNO055::adafruit_bno055_axis_remap_config_t)AXIS_REMAP_CONFIG);
   Bno.setAxisSign((Adafruit_BNO055::adafruit_bno055_axis_remap_sign_t)AXIS_REMAP_SIGN);
 }
 
-void imu_read() {
+void imu_read()
+{
   // Get Euler angles (in degrees)
   imu::Vector<3> myData = Bno.getVector(Adafruit_BNO055::VECTOR_EULER);
   // Might need to remap the angles to match the ROV's orientation
@@ -276,26 +316,30 @@ void imu_read() {
   pitchAngle = myData.z();
 }
 
-void debugThrusters() {
+void debugThrusters()
+{
   Serial.println("Thruster Forces:");
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < 4; i++)
+  {
     Serial.print(" F");
     Serial.print(i + 1);
     Serial.print(": ");
-    Serial.print(int(outputHorizontalThrusters[i]));  // Print with 2 decimal places
+    Serial.print(int(outputHorizontalThrusters[i])); // Print with 2 decimal places
   }
 
-  for (int i = 0; i < 2; i++) {
+  for (int i = 0; i < 2; i++)
+  {
     Serial.print(" F");
     Serial.print(i + 5);
     Serial.print(": ");
-    Serial.print(int(outputVerticalThrusters[i]));  // Print with 2 decimal places
+    Serial.print(int(outputVerticalThrusters[i])); // Print with 2 decimal places
   }
 
   Serial.println();
 }
 
-void debugSensors() {
+void debugSensors()
+{
   imu_read();
   Serial.print(yawAngle);
   Serial.print("  ");
@@ -305,29 +349,40 @@ void debugSensors() {
   Serial.println();
 }
 
-void checkPitchPid() {
-  if (Serial.available() > 0) {
+void checkPitchPid()
+{
+  if (Serial.available() > 0)
+  {
     char incoming = Serial.read();
-    if (incoming == 's') {
+    if (incoming == 's')
+    {
       NULL_INPUT_PITCH_FLAG = 0;
-    } else if (incoming == 'e') {
+    }
+    else if (incoming == 'e')
+    {
       NULL_INPUT_PITCH_FLAG = 1;
     }
   }
 }
 
-void checkYawPid() {
-  if (Serial.available() > 0) {
+void checkYawPid()
+{
+  if (Serial.available() > 0)
+  {
     char incoming = Serial.read();
-    if (incoming == 'm') {
+    if (incoming == 'm')
+    {
       NULL_INPUT_YAW_FLAG = 0;
-    } else if (incoming == 'n') {
+    }
+    else if (incoming == 'n')
+    {
       NULL_INPUT_YAW_FLAG = 1;
     }
   }
 }
 
-void stopMotors() {
+void stopMotors()
+{
   outputHorizontalThrusters[0] = 0;
   outputHorizontalThrusters[1] = 0;
   outputHorizontalThrusters[2] = 0;
@@ -339,7 +394,8 @@ void stopMotors() {
   controlMotors();
 }
 
-void testMotors() {
+void testMotors()
+{
   outputHorizontalThrusters[0] = 255;
   outputHorizontalThrusters[1] = 255;
   outputHorizontalThrusters[2] = 255;
@@ -351,15 +407,18 @@ void testMotors() {
   controlMotors();
 }
 
-void checkSerial() {
-  if (millis() - last_time_data_received > serial_timeout_ms) {
+void checkSerial()
+{
+  if (millis() - last_time_data_received > serial_timeout_ms)
+  {
     stopMotors();
     controlMotors();
-    Serial.print("No connection   ");
+    Serial.println("No connection with the PI, stopping the motors");
   }
 }
 
-void checkAllSystem() {
+void checkAllSystem()
+{
   testMotors();
   delay(2000);
   stopMotors();
@@ -377,10 +436,11 @@ void checkAllSystem() {
   dcv2Control(0);
   delay(2000);
   debugSensors();
-  Serial.println("All systems are working fine from Guileta");
+  Serial.println("All systems are working fine from Giulietta");
 }
 
-void checkSerialDataAndControlMotors() {
+void checkSerialDataAndControlMotors()
+{
   readIncomingData();
   imu_read();
   correctYawAngle();
@@ -390,7 +450,8 @@ void checkSerialDataAndControlMotors() {
   debugThrusters();
 }
 
-void sendSensorData() {
+void sendSensorData()
+{
   /*
   All 6 thruster values (4 horizontal + 2 vertical)
 
@@ -450,7 +511,8 @@ void sendSensorData() {
   Serial.println(data);
 }
 
-void mainC() {
+void mainC()
+{
   // Read the incoming data from the serial port
   readIncomingData();
 
@@ -460,28 +522,13 @@ void mainC() {
   // Correct the yaw angle to be between -180 and 180
   correctYawAngle();
 
-// if u need to debug PID for yaw just un comment in thedebug section
-#ifdef DEBUG_PID_YAW
-  checkYawPid();
-#endif
-
-// if u need to debug PID for pitch just un comment in thedebug section
-#ifdef DEBUG_PID_PITCH
-  checkPitchPid();
-#endif
-
   // PID controllers for YAW and PITCH
   operatePID();
 
   // Calculate the thruster forces
   calculateThrust();
 
-// Debug the thrusters
-#ifdef DEBUG_THRUSTERS
-  debugThrusters();
-#endif
-
-  //check that the serial is still working if not stop the motors
+  // check that the serial is still working if not stop the motors
   checkSerial();
 
   // control the motors
@@ -495,6 +542,43 @@ void mainC() {
 
   // Control the DC valve 2
   dcv2Control(dcv2State);
+
+  if (millis() - last_time_data_sent < serial_feedback_ms)
+  {
+    return;
+  }
+  last_time_data_sent = millis();
+
+  // if u need to debug PID for yaw just un comment in thedebug section
+#ifdef DEBUG_PID_YAW
+  checkYawPid();
+#endif
+
+// if u need to debug PID for pitch just un comment in thedebug section
+#ifdef DEBUG_PID_PITCH
+  checkPitchPid();
+#endif
+
+// Debug the thrusters
+#ifdef DEBUG_THRUSTERS
+  debugThrusters();
+#endif
+
+#ifdef DEBUG_DCVLED
+  // Debug the LED and DCV states
+  Serial.print("LED: ");
+  Serial.print(ledState ? "ON" : "OFF");
+  Serial.print("  DCV1: ");
+  Serial.print(dcv1State ? "ON" : "OFF");
+  Serial.print("  DCV2: ");
+  Serial.print(dcv2State ? "ON" : "OFF");
+  Serial.println();
+#endif
+
+#ifdef DEBUG_SENSORS
+  // Debug the sensors
+  debugSensors();
+#endif
 
   // Send sensor data to station
   sendSensorData();

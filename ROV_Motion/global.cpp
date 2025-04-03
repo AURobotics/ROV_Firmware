@@ -36,6 +36,7 @@ bool dataValid = 0;
 
 // Time tracking
 unsigned long last_time_data_received = 0;
+unsigned long last_time_data_sent = 0;
 
 // BNO055 IMU object
 Adafruit_BNO055 Bno(1, BNO055_ADDRESS_B);

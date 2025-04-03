@@ -40,6 +40,7 @@ extern bool dataValid;
 
 // Time tracking
 extern unsigned long last_time_data_received;
+extern unsigned long last_time_data_sent;
 
 // BNO055 IMU object
 extern Adafruit_BNO055 Bno;
