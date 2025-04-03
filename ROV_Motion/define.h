@@ -123,6 +123,24 @@
 
 #define TIME_FOR_TESTING_MOTORS 5000
 
+// Axis remap configuration
+// Default: X Axis = X, Y Axis = Y, Z Axis = Z (AXIS_REMAP_CONFIG = 0x24)
+// Remap values: 00 = X, 01 = Y, 10 = Z, 11 = Invalid
+#define AXIS_REMAP_X 0b00  // X-Axis
+#define AXIS_REMAP_Y 0b01  // Y-Axis
+#define AXIS_REMAP_Z 0b10  // Z-Axis
+
+#define AXIS_REMAP_CONFIG ((AXIS_REMAP_Z << 4) | (AXIS_REMAP_Y << 2) | AXIS_REMAP_X)
+
+// Axis remap sign configuration
+// Default: Positive for all axes (REMAP_SIGN = 0x00)
+// Remap sign values: 0 = Positive, 1 = Negative
+#define AXIS_REMAP_SIGN_X 0b0  // Positive X-Axis
+#define AXIS_REMAP_SIGN_Y 0b0  // Positive Y-Axis
+#define AXIS_REMAP_SIGN_Z 0b0  // Positive Z-Axis
+
+#define AXIS_REMAP_SIGN ((AXIS_REMAP_SIGN_X << 2) | (AXIS_REMAP_SIGN_Y << 1) | AXIS_REMAP_SIGN_Z)
+
 // ############################################ End of Defines ########################################################## //
 
 #endif // DEFINE_H

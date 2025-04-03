@@ -263,19 +263,8 @@ void setupBno() {
   if (!Bno.begin()) {
     Serial.println("BNO055 not detected!");
   }
-  /*
-  Remap Configuration | X Output  | Y Output | Z Output
-  --------------------|-----------|----------|----------
-  REMAP_CONFIG_P0     |  X        |  Y       |  Z
-  REMAP_CONFIG_P1     |  X        | -Y       | -Z
-  REMAP_CONFIG_P2     | -X        |  Y       | -Z
-  REMAP_CONFIG_P3     | -X        | -Y       |  Z
-  REMAP_CONFIG_P4     | -Z        |  X       | -Y
-  REMAP_CONFIG_P5     |  Z        |  X       |  Y
-  REMAP_CONFIG_P6     | -Z        | -X       |  Y
-  REMAP_CONFIG_P7     |  Z        | -X       | -Y
-  */
-  Bno.setAxisRemap(Adafruit_BNO055::REMAP_CONFIG_P0);
+  Bno.setAxisRemap((Adafruit_BNO055::adafruit_bno055_axis_remap_config_t)AXIS_REMAP_CONFIG);
+  Bno.setAxisSign((Adafruit_BNO055::adafruit_bno055_axis_remap_sign_t)AXIS_REMAP_SIGN);
 }
 
 void imu_read() {
