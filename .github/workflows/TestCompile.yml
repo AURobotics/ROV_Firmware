@@ -18,6 +18,6 @@ jobs:
         with:
           arduino-board-fqbn: esp32:esp32:esp32
           sketch-names: ROV_Motion.ino
-          sketch-names-find-start: ROV_Motion  # Explicitly tell it where to search
+          sketch-names-find-start: ROV_Motion
           platform-url: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
-          additional-libraries: "Adafruit BNO055"
+          additional-libraries: Adafruit_BNO055
