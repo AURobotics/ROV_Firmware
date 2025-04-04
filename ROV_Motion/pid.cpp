@@ -6,6 +6,7 @@ float maxOutputYaw = 173.4, minOutputYaw = -173.4;
 bool flag_YAW_PID = false;
 
 void PID_YAW(bool start_YAW_PID) {
+#ifdef PID_YAW_ENABLED
   double error, derror, dt;
   static float ierror = 0;
   static double prvError = 0;
@@ -43,6 +44,7 @@ void PID_YAW(bool start_YAW_PID) {
     prvError = 0;
     outputYaw = 0;
   }
+#endif
 }
 
 // ############################################################## PITCH PID ############################################################## //
@@ -51,6 +53,7 @@ float maxOutputPitch = 102, minOutputPitch = -102;
 bool flag_PITCH_PID = false;
 
 void PID_PITCH(bool start_PITCH_PID) {
+#ifdef PID_PITCH_ENABLED
   double error, derror, dt;
   static float ierror = 0;
   static double prvError;
@@ -88,4 +91,5 @@ void PID_PITCH(bool start_PITCH_PID) {
     prvError = 0;
     outputPitch = 0;
   }
+#endif
 }

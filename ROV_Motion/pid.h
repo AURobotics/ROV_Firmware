@@ -5,6 +5,10 @@
 
 // ########################################################### PID Controllers ########################################################### //
 
+// comment to disable PID controllers
+#define PID_YAW_ENABLED
+#define PID_PITCH_ENABLED
+
 // ############################################################## YAW PID ############################################################## //
 extern float inputYaw, kpYaw, kiYaw, kdYaw, setpointYaw, outputYaw;
 extern float maxOutputYaw, minOutputYaw;
