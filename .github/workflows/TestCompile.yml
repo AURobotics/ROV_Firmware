@@ -10,9 +10,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Debug Directory Structure
-        run: ls -R
-
       - name: Compile Arduino Sketch
         uses: ArminJo/arduino-test-compile@master
         with:
