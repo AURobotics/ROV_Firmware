@@ -20,7 +20,7 @@ jobs:
           pip install pyserial
 
       - name: Compile Arduino Sketch
-        uses: ArminJo/arduino-test-compile@v4
+        uses: ArminJo/arduino-test-compile@master
         with:
           arduino-board-fqbn: esp32:esp32:esp32
           sketch-names: ROV_Motion/ROV_Motion.ino
