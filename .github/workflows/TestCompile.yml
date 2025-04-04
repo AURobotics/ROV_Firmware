@@ -20,4 +20,4 @@ jobs:
           sketch-names: ROV_Motion.ino
           sketch-names-find-start: ROV_Motion
           platform-url: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
-          additional-libraries: Adafruit_BNO055
+          required-libraries: "Adafruit BNO055"
