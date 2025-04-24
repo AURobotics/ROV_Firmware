@@ -36,20 +36,20 @@
 #define motor6PwmB 14
 
 // A //-> written D // motor 1
-#define dirH1 motor1Dir
-#define pwmH1 motor1Pwm
+#define dirH1 motor3Dir
+#define pwmH1 motor3Pwm
 
 // B // -> written D
-#define dirH2 motor2Dir
-#define pwmH2 motor2Pwm
+#define dirH2 motor4Dir
+#define pwmH2 motor4Pwm
 
 // C // written A
-#define dirH3 motor3Dir
-#define pwmH3 motor3Pwm
+#define dirH3 motor2Dir
+#define pwmH3 motor2Pwm
 
 // D // written B
-#define dirH4 motor4Dir
-#define pwmH4 motor4Pwm
+#define dirH4 motor1Dir
+#define pwmH4 motor1Pwm
 
 // E
 #define enV1 32
