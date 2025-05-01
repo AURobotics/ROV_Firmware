@@ -41,7 +41,7 @@ extern Adafruit_BNO055 Bno;
 extern double T_inverse_matrix[8][6];
 
 
-// Function prototype
+// Function prototype 
 void correctYawAngle();
 
 // ################################################# End of Global variables ############################################################### //
