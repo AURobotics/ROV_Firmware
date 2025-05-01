@@ -8,21 +8,20 @@
 // Lights control
 void turnLight(bool state);
 
-// Thrusters setup
-void setup_H_motors();
-void setup_V_motors();
+// Setup DCVs
 void setupDCV();
 
+// setup thrysters
+void setupThrusters();
+
 // Thrusters control
-void controlHmotors();
-void controlVmotors();
-void controlMotors();
+void controlThrusters();
 
 // Thruster force computation
 void applyConstraints(float *thruster_forces, int size, float max_force);
-void ComputeHorrizontalThrustForces(double *input, double T_inverse[4][3], float *outputThrusters);
-void ComputeVerticalThrustForces(double *input, double T_inverse[2][2], float *outputThrusters);
-void calculateThrust();
+
+// Compute thrust speeds
+void calculateThrust(double *input, double T_inverse[8][6], float *outputThrusters)
 
 // Serial communication and control
 void readIncomingData();

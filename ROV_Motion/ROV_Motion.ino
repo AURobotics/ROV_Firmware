@@ -13,9 +13,7 @@
 void setup() {
   Serial.begin(115200);
 
-  // setup motors
-  setup_H_motors();
-  setup_V_motors();
+  setupThrusters() ;
 
   pinMode(led, OUTPUT);
 

@@ -4,21 +4,12 @@
 #include "define.h"
 
 // ########################################################### Global variables ########################################################### //
-// Input forces (Fx, Fy, Tau, Fz, Tpitch)
-extern double inputH[3];  // input forces (Fx, Fy, Tau)
-extern double inputV[2];  // input forces (Fz, Tpitch)
+// input forces (Fx, Fy, Fz , Tpitch , Troll , Tyaw) 
+extern double inputCmds[6];  // input forces (Fx, Fy, Fz , Tpitch , Troll , Tyaw) 
 
-// Horizontal thrust motor driver pins
-extern int HorizontalThrusterPinsDir[4];
-extern int HorizontalThrusterPinsSpeed[4];
-
-// Vertical thrust motor driver pins
-extern int VerticalThrusterSp1[2];
-extern int VerticalThrusterSp2[2];
 
 // Output thrust values
-extern float outputHorizontalThrusters[4];
-extern float outputVerticalThrusters[2];
+extern float outputThrusters[8] ;
 
 // Communication
 extern unsigned char incoming[];
@@ -36,6 +27,7 @@ extern float yawAngle;
 
 extern bool NULL_INPUT_YAW_FLAG;
 extern bool NULL_INPUT_PITCH_FLAG;
+extern bool NULL_INPUT_ROLL_FLAG = 0;
 extern bool dataValid;
 
 // Time tracking
@@ -46,8 +38,8 @@ extern unsigned long last_time_data_sent;
 extern Adafruit_BNO055 Bno;
 
 // Pseudoinverse matrices
-extern double T_inverse_Horizontal[4][3];
-extern double T_inverse_Vertical[2][2];
+extern double T_inverse_matrix[8][6];
+
 
 // Function prototype
 void correctYawAngle();
