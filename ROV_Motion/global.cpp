@@ -1,7 +1,7 @@
 #include "global.h"
 
 // input forces (Fx, Fy, Fz , Tpitch , Troll , Tyaw) 
-double inputCmds[6]; = { 0, 0, 0, 0, 0, 0};
+double inputCmds[6] = { 0, 0, 0, 0, 0, 0};
 
  
 // Output thrust values
@@ -33,6 +33,8 @@ unsigned long last_time_data_sent = 0;
 
 // BNO055 IMU object
 Adafruit_BNO055 Bno(1, BNO055_ADDRESS_B);
+
+Thruster thrusters[8] ;
 
 // Pseudoinverse matrices
 double T_inverse_matrix[8][6] = {

@@ -21,7 +21,7 @@ void controlThrusters();
 void applyConstraints(float *thruster_forces, int size, float max_force);
 
 // Compute thrust speeds
-void calculateThrust(double *input, double T_inverse[8][6], float *outputThrusters)
+void calculateThrust(double *input, double T_inverse[8][6], float *outputThrusters);
 
 // Serial communication and control
 void readIncomingData();

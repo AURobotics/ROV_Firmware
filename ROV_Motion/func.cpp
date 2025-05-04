@@ -11,15 +11,17 @@ void turnLight(bool state)
 // Setup all motors 
 void setupThrusters()
 {
-  Thruster thrusters[8] = {
-      Thruster(Thruster_A_DIR, Thruster_A_PWM, CYTRON),
-      Thruster(Thruster_B_DIR, Thruster_B_PWM, CYTRON),
-      Thruster(Thruster_C_DIR, Thruster_C_PWM, CYTRON),
-      Thruster(Thruster_D_DIR, Thruster_D_PWM, CYTRON),
-      Thruster(Thruster_E_DIR, Thruster_E_PWM, CYTRON),
-      Thruster(Thruster_F_DIR, Thruster_F_PWM, CYTRON),
-      Thruster(Thruster_G_left_PWM, Thruster_G_right_PWM, BTS),
-      Thruster(Thruster_H_left_PWM, Thruster_H_right_PWM, BTS)};
+  // setup all motors
+  thrusters[0] = Thruster(Thruster_A_DIR, Thruster_A_PWM, CYTRON);
+  thrusters[1] = Thruster(Thruster_B_DIR, Thruster_B_PWM, CYTRON);
+  thrusters[2] = Thruster(Thruster_C_DIR, Thruster_C_PWM, CYTRON);
+  thrusters[3] = Thruster(Thruster_D_DIR, Thruster_D_PWM, CYTRON);
+  thrusters[4] = Thruster(Thruster_E_DIR, Thruster_E_PWM, CYTRON);
+  thrusters[5] = Thruster(Thruster_F_DIR, Thruster_F_PWM, CYTRON);
+  thrusters[6] = Thruster(Thruster_G_left_PWM, Thruster_G_right_PWM, BTS);
+  thrusters[7] = Thruster(Thruster_H_left_PWM, Thruster_H_right_PWM, BTS);
+  // Set the speed of each thruster to 0
+
 }
 
 // compute thrust speeds
@@ -53,7 +55,7 @@ void controlThrusters()
   // Set the speed of each thruster
   for (int i = 0; i < 8; i++)
   {
-    thruster[i].setThruster(outputThrusters[i]);
+    thrusters[i].setThruster(outputThrusters[i]);
   }
 }
 
@@ -337,66 +339,66 @@ void checkSerial()
   }
 }
  
-void sendSensorData()
-{
-  /*
-  All 6 thruster values (4 horizontal + 2 vertical)
+// void sendSensorData()
+// {
+//   /*
+//   All 6 thruster values (4 horizontal + 2 vertical)
 
-  Orientation data (roll, pitch, yaw)
+//   Orientation data (roll, pitch, yaw)
 
-  Linear acceleration (x, y, z)
+//   Linear acceleration (x, y, z)
 
-  System status (LED and DC valves states)
+//   System status (LED and DC valves states)
 
-  Example output:
-  {
-  "thrusters":{"h1":125.5,"h2":130.2,"h3":-110.8,"h4":115.0,"v1":80.5,"v2":-90.2},
-  "orientation":{"roll":1.25,"pitch":-0.75,"yaw":45.50},
-  "acceleration":{"x":0.12,"y":-0.05,"z":9.78},
-  "status":{"led":true,"dcv1":false,"dcv2":false}
-  }
-  */
+//   Example output:
+//   {
+//   "thrusters":{"h1":125.5,"h2":130.2,"h3":-110.8,"h4":115.0,"v1":80.5,"v2":-90.2},
+//   "orientation":{"roll":1.25,"pitch":-0.75,"yaw":45.50},
+//   "acceleration":{"x":0.12,"y":-0.05,"z":9.78},
+//   "status":{"led":true,"dcv1":false,"dcv2":false}
+//   }
+//   */
 
-  // Create a JSON-like string with all required data
-  String data = "{";
+//   // Create a JSON-like string with all required data
+//   String data = "{";
 
-  // Add thruster powers
-  data += "\"thrusters\":{";
-  data += "\"h1\":" + String(outputHorizontalThrusters[0], 1) + ",";
-  data += "\"h2\":" + String(outputHorizontalThrusters[1], 1) + ",";
-  data += "\"h3\":" + String(outputHorizontalThrusters[2], 1) + ",";
-  data += "\"h4\":" + String(outputHorizontalThrusters[3], 1) + ",";
-  data += "\"v1\":" + String(outputVerticalThrusters[0], 1) + ",";
-  data += "\"v2\":" + String(outputVerticalThrusters[1], 1);
-  data += "},";
+//   // Add thruster powers
+//   data += "\"thrusters\":{";
+//   data += "\"h1\":" + String(outputHorizontalThrusters[0], 1) + ",";
+//   data += "\"h2\":" + String(outputHorizontalThrusters[1], 1) + ",";
+//   data += "\"h3\":" + String(outputHorizontalThrusters[2], 1) + ",";
+//   data += "\"h4\":" + String(outputHorizontalThrusters[3], 1) + ",";
+//   data += "\"v1\":" + String(outputVerticalThrusters[0], 1) + ",";
+//   data += "\"v2\":" + String(outputVerticalThrusters[1], 1);
+//   data += "},";
 
-  // Add orientation data
-  data += "\"orientation\":{";
-  data += "\"roll\":" + String(rollAngle, 2) + ",";
-  data += "\"pitch\":" + String(pitchAngle, 2) + ",";
-  data += "\"yaw\":" + String(yawAngle, 2);
-  data += "},";
+//   // Add orientation data
+//   data += "\"orientation\":{";
+//   data += "\"roll\":" + String(rollAngle, 2) + ",";
+//   data += "\"pitch\":" + String(pitchAngle, 2) + ",";
+//   data += "\"yaw\":" + String(yawAngle, 2);
+//   data += "},";
 
-  // Add acceleration data
-  imu::Vector<3> accel = Bno.getVector(Adafruit_BNO055::VECTOR_LINEARACCEL);
-  data += "\"acceleration\":{";
-  data += "\"x\":" + String(accel.x(), 2) + ",";
-  data += "\"y\":" + String(accel.y(), 2) + ",";
-  data += "\"z\":" + String(accel.z(), 2);
-  data += "},";
+//   // Add acceleration data
+//   imu::Vector<3> accel = Bno.getVector(Adafruit_BNO055::VECTOR_LINEARACCEL);
+//   data += "\"acceleration\":{";
+//   data += "\"x\":" + String(accel.x(), 2) + ",";
+//   data += "\"y\":" + String(accel.y(), 2) + ",";
+//   data += "\"z\":" + String(accel.z(), 2);
+//   data += "},";
 
-  // Add system status
-  data += "\"status\":{";
-  data += "\"led\":" + String(ledState ? "true" : "false") + ",";
-  data += "\"dcv1\":" + String(dcv1State ? "true" : "false") + ",";
-  data += "\"dcv2\":" + String(dcv2State ? "true" : "false");
-  data += "}";
+//   // Add system status
+//   data += "\"status\":{";
+//   data += "\"led\":" + String(ledState ? "true" : "false") + ",";
+//   data += "\"dcv1\":" + String(dcv1State ? "true" : "false") + ",";
+//   data += "\"dcv2\":" + String(dcv2State ? "true" : "false");
+//   data += "}";
 
-  data += "}";
+//   data += "}";
 
-  // Send the data via Serial
-  Serial.println(data);
-}
+//   // Send the data via Serial
+//   Serial.println(data);
+// }
 
 void mainC()
 {
@@ -469,7 +471,7 @@ void mainC()
 #endif
 
   // Send sensor data to station
-  sendSensorData();
+ // sendSensorData();
 }
 
 // ########################################################### End of Functions ########################################################### //
