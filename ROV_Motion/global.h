@@ -36,7 +36,6 @@ extern unsigned long last_time_data_sent;
 
 // BNO055 IMU object
 extern Adafruit_BNO055 Bno;
-extern Thruster thrusters[8] ;
 
 // Pseudoinverse matrices
 extern double T_inverse_matrix[8][6];

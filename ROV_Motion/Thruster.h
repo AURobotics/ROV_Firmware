@@ -25,6 +25,8 @@ public:
     // Constructor
     Thruster(int pin1 = 0, int pin2 = 0, DriverType eType = CYTRON);
     
+    // Initialize the thruster
+    void init();
 
     // Set the direction and speed of the thruster
     void setThruster(float speed);

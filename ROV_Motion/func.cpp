@@ -1,6 +1,16 @@
 #include "func.h"
 
 // ########################################################### Functions ########################################################### //
+Thruster thrusters[8] = {
+  Thruster(Thruster_A_DIR, Thruster_A_PWM, CYTRON),
+  Thruster(Thruster_B_DIR, Thruster_B_PWM, CYTRON),
+  Thruster(Thruster_C_DIR, Thruster_C_PWM, CYTRON),
+  Thruster(Thruster_D_DIR, Thruster_D_PWM, CYTRON),
+  Thruster(Thruster_E_DIR, Thruster_E_PWM, CYTRON),
+  Thruster(Thruster_F_DIR, Thruster_F_PWM, CYTRON),
+  Thruster(Thruster_G_left_PWM, Thruster_G_right_PWM, BTS),
+  Thruster(Thruster_H_left_PWM, Thruster_H_right_PWM, BTS)
+};
 
 // Lights control
 void turnLight(bool state)
@@ -308,7 +318,7 @@ void stopMotors()
   // Stop all motors by setting their speed to 0
   for (int i = 0; i < 8; i++)
   {
-    thruster[i].setThruster(0);
+    thrusters[i].setThruster(0);
   }
   Serial.println("All motors stopped.");
 }
@@ -318,9 +328,9 @@ void testMotors()
   // Test the motors by setting them to a specific speed
   for (int i = 0; i < 8; i++)
   {
-    thruster[i].setThruster(255);
+    thrusters[i].setThruster(255);
     delay(1000);
-    thruster[i].setThruster(0);
+    thrusters[i].setThruster(0);
   }
   Serial.println("Motors tested successfully.");
 }
@@ -330,7 +340,8 @@ void checkSerial()
   if (millis() - last_time_data_received > serial_timeout_ms)
   {
     stopMotors();
-    controlMotors();
+    Serial.println("Serial timeout! Stopping motors.");
+    
     Serial.println("No connection with the PI, stopping the motors");
   }
 }
