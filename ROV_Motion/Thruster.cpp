@@ -6,11 +6,16 @@ Thruster::Thruster(int pin1, int pin2, DriverType eType)
         m_pins[1] = pin2;
         m_eDriverType = eType;
 
-        pinMode(m_pins[0], OUTPUT);   // Set direction pin as output
-        pinMode(m_pins[1], OUTPUT);   // Set speed pin as output
         m_speed = 0;                // Initialize speed to 0
 }
 
+void Thruster::init()
+{
+    // Set the pin modes for the driver
+        pinMode(m_pins[0], OUTPUT); // Direction pin
+        pinMode(m_pins[1], OUTPUT); // PWM pin
+    
+}
 void Thruster::setThruster(float speed)
 {
     speed = int(speed); // Convert speed to integer

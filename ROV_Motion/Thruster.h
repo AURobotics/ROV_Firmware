@@ -30,10 +30,10 @@ public:
     void setThruster(float speed);
 
     // Get the speed of the thruster
-    void getSpeed();
+    float getSpeed();
     
 
 
-}
+};
 
 #endif

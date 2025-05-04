@@ -12,14 +12,10 @@ void turnLight(bool state)
 void setupThrusters()
 {
   // setup all motors
-  thrusters[0] = Thruster(Thruster_A_DIR, Thruster_A_PWM, CYTRON);
-  thrusters[1] = Thruster(Thruster_B_DIR, Thruster_B_PWM, CYTRON);
-  thrusters[2] = Thruster(Thruster_C_DIR, Thruster_C_PWM, CYTRON);
-  thrusters[3] = Thruster(Thruster_D_DIR, Thruster_D_PWM, CYTRON);
-  thrusters[4] = Thruster(Thruster_E_DIR, Thruster_E_PWM, CYTRON);
-  thrusters[5] = Thruster(Thruster_F_DIR, Thruster_F_PWM, CYTRON);
-  thrusters[6] = Thruster(Thruster_G_left_PWM, Thruster_G_right_PWM, BTS);
-  thrusters[7] = Thruster(Thruster_H_left_PWM, Thruster_H_right_PWM, BTS);
+  for (int i = 0; i < 8; i++)
+  {
+    thrusters[i].init(); // Initialize each thruster
+  }
   // Set the speed of each thruster to 0
 
 }
